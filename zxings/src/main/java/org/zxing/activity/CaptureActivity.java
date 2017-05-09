@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.os.AsyncTask;
@@ -61,11 +60,11 @@ public abstract class CaptureActivity extends AppCompatActivity implements Callb
         super.onResume();
         SurfaceView surfaceView = getSurfaceView();
         SurfaceHolder surfaceHolder = surfaceView.getHolder();
-        if (hasSurface) {
-            initCamera(surfaceHolder);
-        } else {
+        if (!hasSurface) {
             surfaceHolder.addCallback(this);
             surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+        } else {
+            initCamera(surfaceHolder, getSurfaceView().getWidth(), getSurfaceView().getHeight());
         }
         decodeFormats = null;
         characterSet = null;
@@ -99,9 +98,9 @@ public abstract class CaptureActivity extends AppCompatActivity implements Callb
         vibrate();
     }
 
-    private void initCamera(SurfaceHolder surfaceHolder) {
+    private void initCamera(SurfaceHolder surfaceHolder, int width, int height) {
         try {
-            CameraManager.get().openDriver(surfaceHolder);
+            CameraManager.get().openDriver(surfaceHolder, width, height);
         } catch (IOException ioe) {
             showTipAndExit(ioe.getMessage());
             return;
@@ -124,14 +123,15 @@ public abstract class CaptureActivity extends AppCompatActivity implements Callb
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width,
                                int height) {
-
+        if (hasSurface) {
+            initCamera(holder, width, height);
+        }
     }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         if (!hasSurface) {
             hasSurface = true;
-            initCamera(holder);
         }
 
     }

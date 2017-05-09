@@ -120,7 +120,7 @@ public final class CameraManager {
      * @param holder The surface object which the camera will draw preview frames into.
      * @throws IOException Indicates the camera driver failed to open.
      */
-    public void openDriver(SurfaceHolder holder) throws IOException {
+    public void openDriver(SurfaceHolder holder, int widths, int heights) throws IOException {
         if (camera == null) {
             camera = Camera.open();
             if (camera == null) {
@@ -130,7 +130,7 @@ public final class CameraManager {
 
             if (!initialized) {
                 initialized = true;
-                configManager.initFromCameraParameters(camera);
+                configManager.initFromCameraParameters(camera, widths, heights);
             }
             configManager.setDesiredCameraParameters(camera);
 

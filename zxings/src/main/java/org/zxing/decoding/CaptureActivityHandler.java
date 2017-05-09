@@ -130,8 +130,7 @@ public final class CaptureActivityHandler extends Handler {
         try {
             SurfaceView surfaceView = activity.getSurfaceView();
             SurfaceHolder surfaceHolder = surfaceView.getHolder();
-
-//            surfaceHolder.removeCallback();
+            surfaceHolder.removeCallback(activity);
             CameraManager.get().closeDriver();
             decodeThread.join();
         } catch (Exception e) {

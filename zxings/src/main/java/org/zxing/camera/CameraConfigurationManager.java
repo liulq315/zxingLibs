@@ -54,7 +54,7 @@ final class CameraConfigurationManager {
     /**
      * Reads, one time, values from the camera that are needed by the app.
      */
-    void initFromCameraParameters(Camera camera) {
+    void initFromCameraParameters(Camera camera,int widths,int heights) {
         Camera.Parameters parameters = camera.getParameters();
         previewFormat = parameters.getPreviewFormat();
         previewFormatString = parameters.get("preview-format");
@@ -62,8 +62,8 @@ final class CameraConfigurationManager {
         WindowManager manager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         Display display = manager.getDefaultDisplay();
 
-        int width = display.getWidth();
-        int height = display.getHeight();
+        int width = widths;
+        int height = heights;
         screenResolution = new Point(width, height);
         if (width < height) {
             int temp = width;
