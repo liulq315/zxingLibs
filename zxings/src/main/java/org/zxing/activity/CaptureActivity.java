@@ -2,46 +2,34 @@ package org.zxing.activity;
 
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.support.v7.app.AppCompatActivity;
-import android.text.TextUtils;
 import android.view.SurfaceHolder;
 import android.view.SurfaceHolder.Callback;
 import android.view.SurfaceView;
 import android.widget.Toast;
 
 import com.google.zxing.BarcodeFormat;
-import com.google.zxing.BinaryBitmap;
-import com.google.zxing.ChecksumException;
-import com.google.zxing.DecodeHintType;
-import com.google.zxing.FormatException;
-import com.google.zxing.NotFoundException;
 import com.google.zxing.Result;
-import com.google.zxing.common.HybridBinarizer;
-import com.google.zxing.qrcode.QRCodeReader;
 
 import org.zxing.Utils;
 import org.zxing.camera.CameraManager;
 import org.zxing.decoding.CaptureActivityHandler;
 import org.zxing.decoding.FinishListener;
 import org.zxing.decoding.InactivityTimer;
-import org.zxing.encoding.RGBLuminanceSource;
-import org.zxing.lib.R;
+import org.zxing.encoding.QRCodeDecoder;
 import org.zxing.view.AbViewfinderView;
 
 import java.io.IOException;
-import java.util.Hashtable;
-import java.util.Map;
 import java.util.Vector;
 
 /**
@@ -56,11 +44,8 @@ public abstract class CaptureActivity extends AppCompatActivity implements Callb
     private Vector<BarcodeFormat> decodeFormats;
     private String characterSet;
     protected InactivityTimer inactivityTimer;
-    private MediaPlayer mediaPlayer;
-    private boolean playBeep;
-    private static final float BEEP_VOLUME = 0.10f;
-    private boolean vibrate;
-    protected boolean mLightOn = false;
+    private static final long VIBRATE_DURATION = 200L;
+    private boolean mLightOn = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -84,14 +69,6 @@ public abstract class CaptureActivity extends AppCompatActivity implements Callb
         }
         decodeFormats = null;
         characterSet = null;
-
-        playBeep = true;
-        AudioManager audioService = (AudioManager) getSystemService(AUDIO_SERVICE);
-        if (audioService.getRingerMode() != AudioManager.RINGER_MODE_NORMAL) {
-            playBeep = false;
-        }
-        initBeepSound();
-        vibrate = true;
 
     }
 
@@ -119,7 +96,7 @@ public abstract class CaptureActivity extends AppCompatActivity implements Callb
      * @param barcode
      */
     public void handleDecode(Result result, Bitmap barcode) {
-        playBeepSoundAndVibrate();
+        vibrate();
     }
 
     private void initCamera(SurfaceHolder surfaceHolder) {
@@ -134,7 +111,6 @@ public abstract class CaptureActivity extends AppCompatActivity implements Callb
         }
         if (this.handler == null) {
             this.handler = new CaptureActivityHandler(this, this.decodeFormats, this.characterSet);
-            this.scanningImage1(this.photo_path);
         }
     }
 
@@ -163,7 +139,6 @@ public abstract class CaptureActivity extends AppCompatActivity implements Callb
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
         hasSurface = false;
-
     }
 
     public abstract AbViewfinderView getViewfinderView();
@@ -174,144 +149,12 @@ public abstract class CaptureActivity extends AppCompatActivity implements Callb
 
     public void drawViewfinder() {
         getViewfinderView().drawViewfinder();
-
     }
 
-    protected Result scanningImage(String path) {
-        if (TextUtils.isEmpty(path)) {
 
-            return null;
-
-        }
-        // DecodeHintType 和EncodeHintType
-        Hashtable<DecodeHintType, Object> hints = new Hashtable();
-        hints.put(DecodeHintType.CHARACTER_SET, "UTF8"); // 设置二维码内容的编码
-        hints.put(DecodeHintType.TRY_HARDER, Boolean.TRUE);
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true; // 先获取原大小
-        Bitmap scanBitmap = BitmapFactory.decodeFile(path, options);
-        options.inJustDecodeBounds = false; // 获取新的大小
-
-        int sampleSize = (int) (options.outHeight / (float) 200);
-
-        if (sampleSize <= 0)
-            sampleSize = 1;
-        options.inSampleSize = sampleSize;
-        scanBitmap = BitmapFactory.decodeFile(path, options);
-
-
-        RGBLuminanceSource source = new RGBLuminanceSource(scanBitmap);
-        BinaryBitmap bitmap1 = new BinaryBitmap(new HybridBinarizer(source));
-        QRCodeReader reader = new QRCodeReader();
-        Result result;
-        try {
-            result = reader.decode(bitmap1, hints);
-            handleDecode(result, scanBitmap);
-            return result;
-
-        } catch (NotFoundException e) {
-            Toast.makeText(getApplicationContext(), "1", Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
-
-        } catch (ChecksumException e) {
-            Toast.makeText(getApplicationContext(), "1", Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
-
-        } catch (FormatException e) {
-
-            e.printStackTrace();
-
-        }
-
-        return null;
-
-    }
-
-    private void scanningImage1(String picturePath) {
-
-        if (TextUtils.isEmpty(picturePath)) {
-            return;
-        }
-
-        Map<DecodeHintType, String> hints1 = new Hashtable<DecodeHintType, String>();
-        hints1.put(DecodeHintType.CHARACTER_SET, "UTF8");
-
-
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true; // 先获取原大小
-        Bitmap scanBitmap;
-        options.inJustDecodeBounds = false; // 获取新的大小
-        int sampleSize = (int) (options.outHeight / (float) 200);
-        if (sampleSize <= 0)
-            sampleSize = 1;
-        options.inSampleSize = sampleSize;
-        scanBitmap = BitmapFactory.decodeFile(picturePath, options);
-        RGBLuminanceSource source = new RGBLuminanceSource(scanBitmap);
-        BinaryBitmap bitmap1 = new BinaryBitmap(new HybridBinarizer(source));
-
-
-        QRCodeReader reader = new QRCodeReader();
-        Result result;
-        try {
-
-            result = reader.decode(bitmap1, (Hashtable<DecodeHintType, String>) hints1);
-            if (result != null && TextUtils.isEmpty(result.getText()))
-                handleDecode(result, scanBitmap);
-            else {
-                Toast.makeText(CaptureActivity.this, "解析错误，请选择正确的二维码图片",
-                        Toast.LENGTH_LONG).show();
-            }
-            scanBitmap.recycle();
-
-        } catch (NotFoundException e) {
-            Toast.makeText(CaptureActivity.this, "解析错误，请选择正确的二维码图片",
-                    Toast.LENGTH_LONG).show();
-            e.printStackTrace();
-        } catch (ChecksumException e) {
-            Toast.makeText(CaptureActivity.this, "解析错误，请选择正确的二维码图片",
-                    Toast.LENGTH_LONG).show();
-            e.printStackTrace();
-        } catch (FormatException e) {
-            Toast.makeText(CaptureActivity.this, "解析错误，请选择正确的二维码图片",
-                    Toast.LENGTH_LONG).show();
-            e.printStackTrace();
-        }
-    }
-
-    private void initBeepSound() {
-        if (playBeep && mediaPlayer == null) {
-            // The volume on STREAM_SYSTEM is not adjustable, and users found it
-            // too loud,
-            // so we now play on the music stream.
-            setVolumeControlStream(AudioManager.STREAM_MUSIC);
-            mediaPlayer = new MediaPlayer();
-            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            mediaPlayer.setOnCompletionListener(beepListener);
-
-            AssetFileDescriptor file = getResources().openRawResourceFd(
-                    R.raw.beep);
-            try {
-                mediaPlayer.setDataSource(file.getFileDescriptor(),
-                        file.getStartOffset(), file.getLength());
-                file.close();
-                mediaPlayer.setVolume(BEEP_VOLUME, BEEP_VOLUME);
-                mediaPlayer.prepare();
-            } catch (IOException e) {
-                mediaPlayer = null;
-            }
-        }
-    }
-
-    private static final long VIBRATE_DURATION = 200L;
-
-    protected void playBeepSoundAndVibrate() {
-        if (playBeep && mediaPlayer != null) {
-            mediaPlayer.start();
-        }
-        if (vibrate) {
-            Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
-            vibrator.vibrate(VIBRATE_DURATION);
-        }
+    protected void vibrate() {
+        Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+        vibrator.vibrate(VIBRATE_DURATION);
     }
 
     String photo_path = null;
@@ -332,7 +175,7 @@ public abstract class CaptureActivity extends AppCompatActivity implements Callb
                         }
                     }
                     cursor.close();
-                    scanningImage(photo_path);
+                    new AsyncTasks(this, this.photo_path).execute();
                     break;
 
                 default:
@@ -341,6 +184,37 @@ public abstract class CaptureActivity extends AppCompatActivity implements Callb
         }
 
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    static class AsyncTasks extends AsyncTask<String, Void, Result> {
+        CaptureActivity activity;
+        String path;
+
+        public AsyncTasks(CaptureActivity captureActivity, String path) {
+            activity = captureActivity;
+            this.path = path;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+        }
+
+        @Override
+        protected Result doInBackground(String... params) {
+            return QRCodeDecoder.syncDecodeQRCode(path);
+        }
+
+
+        @Override
+        protected void onPostExecute(Result result) {
+            if (result == null) {
+                Toast.makeText(activity.getApplicationContext(), "未发现二维码", Toast.LENGTH_SHORT).show();
+            } else {
+                activity.handleDecode(result, QRCodeDecoder.getDecodeAbleBitmap(this.path));
+            }
+        }
     }
 
     protected void photo() {
@@ -356,47 +230,18 @@ public abstract class CaptureActivity extends AppCompatActivity implements Callb
         this.startActivityForResult(wrapperIntent, 234);
     }
 
-//    /**
-//     * 解析QR图内容
-//     *
-//     * @return
-//     */
-    // 解析QR图片
-//    private void scanningImage1(String picturePath) {
-//
-//        if (TextUtils.isEmpty(picturePath)) {
-//            return;
-//        }
-//        // 获得待解析的图片
-//        Bitmap bitmap = BitmapFactory.decodeFile(picturePath);
-//
-//        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
-//        baos.toByteArray();
-//        if (handler != null)
-//            handler.scanningImage1(bitmap.getWidth(), bitmap.getHeight(), baos.toByteArray());
-//        bitmap.recycle();
-//
-//
-//    }
-
-    /**
-     * When the beep has finished playing, rewind to queue up another one.
-     */
-    private final OnCompletionListener beepListener = new OnCompletionListener() {
+    static class Listener implements OnCompletionListener {
         public void onCompletion(MediaPlayer mediaPlayer) {
             mediaPlayer.seekTo(0);
         }
-    };
-
-    public void turnLightOff() {
-        this.mLightOn = false;
-        CameraManager.get().offLight();
     }
 
-    public void turnLightOn() {
-        this.mLightOn = true;
-        CameraManager.get().openLight();
-    }
 
+    protected void lightOnAndOff() {
+        if (this.mLightOn)
+            CameraManager.get().offLight();
+        else
+            CameraManager.get().openLight();
+        mLightOn = !mLightOn;
+    }
 }

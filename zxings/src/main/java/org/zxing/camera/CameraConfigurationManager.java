@@ -61,20 +61,19 @@ final class CameraConfigurationManager {
         Log.d(TAG, "Default preview format: " + previewFormat + '/' + previewFormatString);
         WindowManager manager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         Display display = manager.getDefaultDisplay();
-        screenResolution = new Point(display.getWidth(), display.getHeight());
-        Point screenResolutionForCamera = new Point();
-        screenResolutionForCamera.x = screenResolution.x;
-        screenResolutionForCamera.y = screenResolution.y;
-        if (screenResolution.x < screenResolution.y) {
-            screenResolutionForCamera.x = screenResolution.y;
-            screenResolutionForCamera.y = screenResolution.x;
-        }
 
-//        cameraResolution = getCameraResolution(parameters, screenResolutionForCamera);
-        cameraResolution = getCameraResolution(parameters, screenResolutionForCamera);
-//        cameraResolution = findBestPreviewSizeValue(parameters,screenResolutionForCamera);
+        int width = display.getWidth();
+        int height = display.getHeight();
+        screenResolution = new Point(width, height);
+        if (width < height) {
+            int temp = width;
+            width = height;
+            height = temp;
+        }
+        cameraResolution = getCameraResolution(parameters, new Point(width, height));
+//        cameraResolution = findBestPreviewSizeValue(parameters, new Point(width, height));
 //        cameraResolution = findBestPreviewSizeValue(parameters,
-//                screenResolutionForCamera);
+//                new Point(width,height));
         Log.d(TAG, "Camera resolution: " + screenResolution);
     }
 
@@ -88,21 +87,23 @@ final class CameraConfigurationManager {
         Camera.Parameters parameters = camera.getParameters();
         List<Camera.Size> supportedPreviewSizes = parameters.getSupportedPreviewSizes();
         int position = 0;
-        if (supportedPreviewSizes.size() > 2) {
-            position = supportedPreviewSizes.size() / 2 + 1;//supportedPreviewSizes.get();
+        int sieze = 2;
+        if (supportedPreviewSizes.size() > sieze) {
+            position = supportedPreviewSizes.size() / sieze + 1;//supportedPreviewSizes.get();
         } else {
-            position = supportedPreviewSizes.size() / 2;
+            position = supportedPreviewSizes.size() / sieze;
         }
-
+//3->768*432  3->640*480
         int width = supportedPreviewSizes.get(position).width;
         int height = supportedPreviewSizes.get(position).height;
         Log.d(TAG, "Setting preview size: " + cameraResolution);
-        camera.setDisplayOrientation(90);
+
         cameraResolution.x = width;
         cameraResolution.y = height;
         parameters.setPreviewSize(width, height);
         setFlash(parameters);
         setZoom(parameters);
+        camera.setDisplayOrientation(90);
         camera.setParameters(parameters);
     }
 

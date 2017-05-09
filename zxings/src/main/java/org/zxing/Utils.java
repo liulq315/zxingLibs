@@ -3,6 +3,8 @@ package org.zxing;
 import android.annotation.SuppressLint;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.pm.FeatureInfo;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -25,11 +27,30 @@ public final class Utils {
     public Utils() {
     }
 
+    /**
+     * 判断是否支持打开手电筒
+     *
+     * @param pm
+     * @return
+     */
+    public static boolean isSupportCameraLedFlash(PackageManager pm) {
+        if (pm != null) {
+            FeatureInfo[] features = pm.getSystemAvailableFeatures();
+            if (features != null) {
+                for (FeatureInfo f : features) {
+                    if (f != null && PackageManager.FEATURE_CAMERA_FLASH.equals(f.name))
+                        return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public static boolean isChineseCharacter(String chineseStr) {
         char[] charArray = chineseStr.toCharArray();
 
-        for(int i = 0; i < charArray.length; ++i) {
-            if((charArray[i] < 0 || charArray[i] >= '�') && (charArray[i] <= '�' || charArray[i] >= '\uffff')) {
+        for (int i = 0; i < charArray.length; ++i) {
+            if ((charArray[i] < 0 || charArray[i] >= '�') && (charArray[i] <= '�' || charArray[i] >= '\uffff')) {
                 return false;
             }
         }
@@ -46,9 +67,9 @@ public final class Utils {
             BitMatrix bitMatrix = (new QRCodeWriter()).encode(info, BarcodeFormat.QR_CODE, qrWidth, qrHeith, e);
             int[] pixels = new int[qrWidth * qrHeith];
 
-            for(int bitmap = 0; bitmap < qrHeith; ++bitmap) {
-                for(int x = 0; x < qrWidth; ++x) {
-                    if(bitMatrix.get(x, bitmap)) {
+            for (int bitmap = 0; bitmap < qrHeith; ++bitmap) {
+                for (int x = 0; x < qrWidth; ++x) {
+                    if (bitMatrix.get(x, bitmap)) {
                         pixels[bitmap * qrWidth + x] = -16777216;
                     } else {
                         pixels[bitmap * qrWidth + x] = -1;
@@ -68,34 +89,34 @@ public final class Utils {
     @SuppressLint({"NewApi"})
     public static String getPath(Context context, Uri uri) {
         boolean isKitKat = Build.VERSION.SDK_INT >= 19;
-        if(isKitKat && DocumentsContract.isDocumentUri(context, uri)) {
+        if (isKitKat && DocumentsContract.isDocumentUri(context, uri)) {
             String docId;
             String[] split;
             String type;
-            if(isExternalStorageDocument(uri)) {
+            if (isExternalStorageDocument(uri)) {
                 docId = DocumentsContract.getDocumentId(uri);
                 split = docId.split(":");
                 type = split[0];
-                if("primary".equalsIgnoreCase(type)) {
+                if ("primary".equalsIgnoreCase(type)) {
                     return Environment.getExternalStorageDirectory() + "/" + split[1];
                 }
             } else {
-                if(isDownloadsDocument(uri)) {
+                if (isDownloadsDocument(uri)) {
                     docId = DocumentsContract.getDocumentId(uri);
                     Uri split1 = ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"), Long.valueOf(docId).longValue());
-                    return getDataColumn(context, split1, (String)null, (String[])null);
+                    return getDataColumn(context, split1, (String) null, (String[]) null);
                 }
 
-                if(isMediaDocument(uri)) {
+                if (isMediaDocument(uri)) {
                     docId = DocumentsContract.getDocumentId(uri);
                     split = docId.split(":");
                     type = split[0];
                     Uri contentUri = null;
-                    if("image".equals(type)) {
+                    if ("image".equals(type)) {
                         contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-                    } else if("video".equals(type)) {
+                    } else if ("video".equals(type)) {
                         contentUri = android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
-                    } else if("audio".equals(type)) {
+                    } else if ("audio".equals(type)) {
                         contentUri = android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
                     }
 
@@ -105,11 +126,11 @@ public final class Utils {
                 }
             }
         } else {
-            if("content".equalsIgnoreCase(uri.getScheme())) {
-                return getDataColumn(context, uri, (String)null, (String[])null);
+            if ("content".equalsIgnoreCase(uri.getScheme())) {
+                return getDataColumn(context, uri, (String) null, (String[]) null);
             }
 
-            if("file".equalsIgnoreCase(uri.getScheme())) {
+            if ("file".equalsIgnoreCase(uri.getScheme())) {
                 return uri.getPath();
             }
         }
@@ -124,15 +145,15 @@ public final class Utils {
 
         String var8;
         try {
-            cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs, (String)null);
-            if(cursor == null || !cursor.moveToFirst()) {
+            cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs, (String) null);
+            if (cursor == null || !cursor.moveToFirst()) {
                 return null;
             }
 
             int column_index = cursor.getColumnIndexOrThrow("_data");
             var8 = cursor.getString(column_index);
         } finally {
-            if(cursor != null) {
+            if (cursor != null) {
                 cursor.close();
             }
 

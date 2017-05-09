@@ -31,16 +31,7 @@ public class CaptureActivity1 extends CaptureActivity {
     }
 
     public void ssopen(View view) {
-        Button button = (Button) view;
-        if (mLightOn){
-            turnLightOff();
-            button.setText("打开");
-        }
-
-        else {
-            turnLightOn();
-            button.setText("关闭");
-        }
+        lightOnAndOff();
     }
 
     @Override
@@ -57,8 +48,6 @@ public class CaptureActivity1 extends CaptureActivity {
     @Override
     public void handleDecode(Result result, Bitmap barcode) {
         super.handleDecode(result, barcode);
-        inactivityTimer.onActivity();
-        playBeepSoundAndVibrate();
         String resultString = result.getText();
         //FIXME
         if (resultString.equals("")) {

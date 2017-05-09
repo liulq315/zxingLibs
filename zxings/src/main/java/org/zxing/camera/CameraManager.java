@@ -159,10 +159,14 @@ public final class CameraManager {
      * Asks the camera hardware to begin drawing preview frames to the screen.
      */
     public void startPreview() {
-        if (camera != null && !previewing) {
-            camera.startPreview();
-            previewing = true;
+        try {
+            if (camera != null && !previewing) {
+                camera.startPreview();
+                previewing = true;
+            }
+        } catch (Exception e) {
         }
+
     }
 
     /**
@@ -295,19 +299,19 @@ public final class CameraManager {
      *
      * @param points The points returned by the Reader subclass through Result.getResultPoints().
      * @return An array of Points scaled to the size of the framing rect and offset appropriately
-     *         so they can be drawn in screen coordinates.
+     * so they can be drawn in screen coordinates.
      */
-  public Point[] convertResultPoints(ResultPoint[] points) {
-    Rect frame = getFramingRectInPreview();
-    int count = points.length;
-    Point[] output = new Point[count];
-    for (int x = 0; x < count; x++) {
-      output[x] = new Point();
-      output[x].x = frame.left + (int) (points[x].getX() + 0.5f);
-      output[x].y = frame.top + (int) (points[x].getY() + 0.5f);
+    public Point[] convertResultPoints(ResultPoint[] points) {
+        Rect frame = getFramingRectInPreview();
+        int count = points.length;
+        Point[] output = new Point[count];
+        for (int x = 0; x < count; x++) {
+            output[x] = new Point();
+            output[x].x = frame.left + (int) (points[x].getX() + 0.5f);
+            output[x].y = frame.top + (int) (points[x].getY() + 0.5f);
+        }
+        return output;
     }
-    return output;
-  }
 
     /**
      * A factory method to build the appropriate LuminanceSource object based on the format
@@ -330,21 +334,23 @@ public final class CameraManager {
                 // about the Y channel, so allow it.
             case PixelFormat.YCbCr_422_SP:
                 return new PlanarYUVLuminanceSource(data, width, height, rect.left, rect.top,
-                        rect.width(), rect.height(),false);
+                        rect.width(), rect.height(), false);
             default:
                 // The Samsung Moment incorrectly uses this variant instead of the 'sp' version.
                 // Fortunately, it too has all the Y data up front, so we can read it.
                 if ("yuv420p".equals(previewFormatString)) {
                     return new PlanarYUVLuminanceSource(data, width, height, rect.left, rect.top,
-                            rect.width(), rect.height(),false);
+                            rect.width(), rect.height(), false);
                 }
         }
         throw new IllegalArgumentException("Unsupported picture format: " +
                 previewFormat + '/' + previewFormatString);
     }
+
     private Camera.Parameters parameter;
+
     public void openLight() {
-        if(this.camera != null) {
+        if (this.camera != null) {
             this.parameter = this.camera.getParameters();
             this.parameter.setFlashMode("torch");
             this.camera.setParameters(this.parameter);
@@ -353,7 +359,7 @@ public final class CameraManager {
     }
 
     public void offLight() {
-        if(this.camera != null) {
+        if (this.camera != null) {
             this.parameter = this.camera.getParameters();
             this.parameter.setFlashMode("off");
             this.camera.setParameters(this.parameter);
