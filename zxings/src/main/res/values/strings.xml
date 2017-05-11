@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">zxings</string>
+    <string name="app_name">zxingLibs</string>
 
     <color name="result_view">#b0000000</color>
     <color name="possible_result_points">#c0ffff00</color>

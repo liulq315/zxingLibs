@@ -1,19 +1,3 @@
-/*
- * Copyright (C) 2008 ZXing authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.zxing.view;
 
 import android.content.Context;
@@ -27,16 +11,11 @@ import android.util.AttributeSet;
 import com.google.zxing.ResultPoint;
 
 import org.zxing.camera.CameraManager;
-import org.zxing.lib.R;
+import org.lqos.zxings.R;
 
 import java.util.Collection;
 import java.util.HashSet;
 
-/**
- * This view is overlaid on top of the camera preview. It adds the viewfinder rectangle and partial
- * transparency outside it, as well as the laser scanner animation and result points.
- * �Զ����View������ʱ�м���ʾ��
- */
 public final class ViewfinderView1 extends AbViewfinderView {
 
     private static final int[] SCANNER_ALPHA = {0, 64, 128, 192, 255, 192, 128, 64};

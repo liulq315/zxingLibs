@@ -92,7 +92,7 @@ public class QRCodeDecoder {
      * 将本地图片文件转换成可解码二维码的 Bitmap。为了避免图片太大，这里对图片进行了压缩。感谢 https://github.com/devilsen 提的 PR
      *
      * @param picturePath 本地图片文件路径
-     * @return
+     * @return image bitmap
      */
     public static Bitmap getDecodeAbleBitmap(String picturePath) {
         try {

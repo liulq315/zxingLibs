@@ -18,11 +18,11 @@ public class AbViewfinderView extends View {
         this(context, null);
     }
 
-    public AbViewfinderView(Context context, @Nullable AttributeSet attrs) {
+    public AbViewfinderView(Context context,AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public AbViewfinderView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public AbViewfinderView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 

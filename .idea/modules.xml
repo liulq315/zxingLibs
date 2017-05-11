@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Zxing.iml" filepath="$PROJECT_DIR$/Zxing.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/zxingLibs.iml" filepath="$PROJECT_DIR$/zxingLibs.iml" />
       <module fileurl="file://$PROJECT_DIR$/zxings/zxings.iml" filepath="$PROJECT_DIR$/zxings/zxings.iml" />
     </modules>
   </component>

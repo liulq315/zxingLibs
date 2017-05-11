@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="zxings-1.0.1">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.android/build-cache/58599f939fa7fd83f23cab06bbc2ab12f7c2da20/output/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.android/build-cache/58599f939fa7fd83f23cab06bbc2ab12f7c2da20/output/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.lqos.zxing/zxings/1.0.1/4ae9fb363d0dbc59dd1c97cfff5208f51b06580/zxings-1.0.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
