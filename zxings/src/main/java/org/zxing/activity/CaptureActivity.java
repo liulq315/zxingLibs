@@ -31,11 +31,6 @@ import org.zxing.view.AbViewfinderView;
 import java.io.IOException;
 import java.util.Vector;
 
-/**
- * Initial the camera
- *
- * @author Ryan.Tang
- */
 public abstract class CaptureActivity extends AppCompatActivity implements Callback {
 
     private CaptureActivityHandler handler;
