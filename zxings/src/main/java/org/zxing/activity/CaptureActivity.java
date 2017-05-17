@@ -80,6 +80,7 @@ public abstract class CaptureActivity extends AppCompatActivity implements Callb
             handler.quitSynchronously();
             handler = null;
         }
+        hasSurface = false;
     }
 
     @Override

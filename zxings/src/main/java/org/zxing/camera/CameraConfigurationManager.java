@@ -22,6 +22,7 @@ import android.hardware.Camera;
 import android.os.Build;
 import android.util.Log;
 import android.view.Display;
+import android.view.Surface;
 import android.view.WindowManager;
 
 import java.util.ArrayList;
@@ -35,9 +36,6 @@ final class CameraConfigurationManager {
     private static final String TAG = CameraConfigurationManager.class.getSimpleName();
 
     private static final int TEN_DESIRED_ZOOM = 27;
-    private static final int DESIRED_SHARPNESS = 30;
-    private static final int MIN_PREVIEW_PIXELS = 470 * 320; // normal screen
-    private static final int MAX_PREVIEW_PIXELS = 1280 * 800;
 
     private static final Pattern COMMA_PATTERN = Pattern.compile(",");
 
@@ -54,14 +52,11 @@ final class CameraConfigurationManager {
     /**
      * Reads, one time, values from the camera that are needed by the app.
      */
-    void initFromCameraParameters(Camera camera,int widths,int heights) {
+    void initFromCameraParameters(Camera camera, int widths, int heights) {
         Camera.Parameters parameters = camera.getParameters();
         previewFormat = parameters.getPreviewFormat();
         previewFormatString = parameters.get("preview-format");
         Log.d(TAG, "Default preview format: " + previewFormat + '/' + previewFormatString);
-        WindowManager manager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        Display display = manager.getDefaultDisplay();
-
         int width = widths;
         int height = heights;
         screenResolution = new Point(width, height);
@@ -71,9 +66,6 @@ final class CameraConfigurationManager {
             height = temp;
         }
         cameraResolution = getCameraResolution(parameters, new Point(width, height));
-//        cameraResolution = findBestPreviewSizeValue(parameters, new Point(width, height));
-//        cameraResolution = findBestPreviewSizeValue(parameters,
-//                new Point(width,height));
         Log.d(TAG, "Camera resolution: " + screenResolution);
     }
 
@@ -93,7 +85,6 @@ final class CameraConfigurationManager {
         } else {
             position = supportedPreviewSizes.size() / sieze;
         }
-//3->768*432  3->640*480
         int width = supportedPreviewSizes.get(position).width;
         int height = supportedPreviewSizes.get(position).height;
         Log.d(TAG, "Setting preview size: " + cameraResolution);
@@ -103,7 +94,7 @@ final class CameraConfigurationManager {
         parameters.setPreviewSize(width, height);
         setFlash(parameters);
         setZoom(parameters);
-        camera.setDisplayOrientation(90);
+        camera.setDisplayOrientation(getDisplayOrientation());
         camera.setParameters(parameters);
     }
 
@@ -119,141 +110,61 @@ final class CameraConfigurationManager {
         return previewFormat;
     }
 
-    private Point findBestPreviewSizeValue(Camera.Parameters parameters,
-                                           Point screenResolution) {
-
-        List<Camera.Size> rawSupportedSizes = parameters
-                .getSupportedPreviewSizes();
-        if (rawSupportedSizes == null) {
-            Log.w(TAG,
-                    "Device returned no supported preview sizes; using default");
-            Camera.Size defaultSize = parameters.getPreviewSize();
-            return new Point(defaultSize.width, defaultSize.height);
-        }
-
-        // Sort by size, descending
-        List<Camera.Size> supportedPreviewSizes = new ArrayList<Camera.Size>(
-                rawSupportedSizes);
-        Collections.sort(supportedPreviewSizes, new Comparator<Camera.Size>() {
-            @Override
-            public int compare(Camera.Size a, Camera.Size b) {
-                int aPixels = a.height * a.width;
-                int bPixels = b.height * b.width;
-                if (bPixels < aPixels) {
-                    return -1;
-                }
-                if (bPixels > aPixels) {
-                    return 1;
-                }
-                return 0;
-            }
-        });
-
-        if (Log.isLoggable(TAG, Log.INFO)) {
-            StringBuilder previewSizesString = new StringBuilder();
-            for (Camera.Size supportedPreviewSize : supportedPreviewSizes) {
-                previewSizesString.append(supportedPreviewSize.width)
-                        .append('x').append(supportedPreviewSize.height)
-                        .append(' ');
-            }
-            Log.i(TAG, "Supported preview sizes: " + previewSizesString);
-        }
-
-        Point bestSize = null;
-        float screenAspectRatio = (float) screenResolution.x
-                / (float) screenResolution.y;
-
-        float diff = Float.POSITIVE_INFINITY;
-        for (Camera.Size supportedPreviewSize : supportedPreviewSizes) {
-            int realWidth = supportedPreviewSize.width;
-            int realHeight = supportedPreviewSize.height;
-            int pixels = realWidth * realHeight;
-            if (pixels < MIN_PREVIEW_PIXELS || pixels > MAX_PREVIEW_PIXELS) {
-                continue;
-            }
-            boolean isCandidatePortrait = realWidth < realHeight;
-            int maybeFlippedWidth = isCandidatePortrait ? realHeight
-                    : realWidth;
-            int maybeFlippedHeight = isCandidatePortrait ? realWidth
-                    : realHeight;
-            if (maybeFlippedWidth == screenResolution.x
-                    && maybeFlippedHeight == screenResolution.y) {
-                Point exactPoint = new Point(realWidth, realHeight);
-                Log.i(TAG, "Found preview size exactly matching screen size: "
-                        + exactPoint);
-                return exactPoint;
-            }
-            float aspectRatio = (float) maybeFlippedWidth
-                    / (float) maybeFlippedHeight;
-            float newDiff = Math.abs(aspectRatio - screenAspectRatio);
-            if (newDiff < diff) {
-                bestSize = new Point(realWidth, realHeight);
-                diff = newDiff;
-            }
-        }
-
-        if (bestSize == null) {
-            Camera.Size defaultSize = parameters.getPreviewSize();
-            bestSize = new Point(defaultSize.width, defaultSize.height);
-            Log.i(TAG, "No suitable preview sizes, using default: " + bestSize);
-        }
-
-        Log.i(TAG, "Found best approximate preview size: " + bestSize);
-        return bestSize;
-    }
-
 
     String getPreviewFormatString() {
         return previewFormatString;
     }
 
     private static Point getCameraResolution(Camera.Parameters parameters, Point screenResolution) {
-
-        String previewSizeValueString = parameters.get("preview-size-values");
-        // saw this on Xperia
-        if (previewSizeValueString == null) {
-            previewSizeValueString = parameters.get("preview-size-value");
-        }
-
-        Point cameraResolution = null;
-
-        if (previewSizeValueString != null) {
-            Log.d(TAG, "preview-size-values parameter: " + previewSizeValueString);
-            cameraResolution = findBestPreviewSizeValue(previewSizeValueString, screenResolution);
-        }
-
+        Point cameraResolution =
+                findBestPreviewSizeValue(parameters, screenResolution);
         if (cameraResolution == null) {
-            // Ensure that the camera resolution is a multiple of 8, as the screen may not be.
-            cameraResolution = new Point(
-                    (screenResolution.x >> 3) << 3,
-                    (screenResolution.y >> 3) << 3);
+            cameraResolution = new Point((screenResolution.x >> 3) << 3, (screenResolution.y >> 3) << 3);
         }
-
         return cameraResolution;
     }
 
-    private static Point findBestPreviewSizeValue(CharSequence previewSizeValueString, Point screenResolution) {
+    public int getDisplayOrientation() {
+        Camera.CameraInfo info = new Camera.CameraInfo();
+        Camera.getCameraInfo(Camera.CameraInfo.CAMERA_FACING_BACK, info);
+        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        Display display = wm.getDefaultDisplay();
+
+        int rotation = display.getRotation();
+        int degrees = 0;
+        switch (rotation) {
+            case Surface.ROTATION_0:
+                degrees = 0;
+                break;
+            case Surface.ROTATION_90:
+                degrees = 90;
+                break;
+            case Surface.ROTATION_180:
+                degrees = 180;
+                break;
+            case Surface.ROTATION_270:
+                degrees = 270;
+                break;
+        }
+        int result;
+        if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+            result = (info.orientation + degrees) % 360;
+            result = (360 - result) % 360;
+        } else {
+            result = (info.orientation - degrees + 360) % 360;
+        }
+        return result;
+
+    }
+
+    private static Point findBestPreviewSizeValue(Camera.Parameters previewSizeValueString, Point screenResolution) {
         int bestX = 0;
         int bestY = 0;
         int diff = Integer.MAX_VALUE;
-        for (String previewSize : COMMA_PATTERN.split(previewSizeValueString)) {
+        for (Camera.Size previewSize : previewSizeValueString.getSupportedPreviewSizes()) {
 
-            previewSize = previewSize.trim();
-            int dimPosition = previewSize.indexOf('x');
-            if (dimPosition < 0) {
-                Log.w(TAG, "Bad preview-size: " + previewSize);
-                continue;
-            }
-
-            int newX;
-            int newY;
-            try {
-                newX = Integer.parseInt(previewSize.substring(0, dimPosition));
-                newY = Integer.parseInt(previewSize.substring(dimPosition + 1));
-            } catch (NumberFormatException nfe) {
-                Log.w(TAG, "Bad preview-size: " + previewSize);
-                continue;
-            }
+            int newX = previewSize.width;
+            int newY = previewSize.height;
 
             int newDiff = Math.abs(newX - screenResolution.x) + Math.abs(newY - screenResolution.y);
             if (newDiff == 0) {
@@ -285,7 +196,8 @@ final class CameraConfigurationManager {
                 return tenDesiredZoom;
             }
             int tenValue = (int) (10.0 * value);
-            if (Math.abs(tenDesiredZoom - value) < Math.abs(tenDesiredZoom - tenBestValue)) {
+            if (Math.abs(tenDesiredZoom - value) < Math.abs(tenDesiredZoom
+                    - tenBestValue)) {
                 tenBestValue = tenValue;
             }
         }
@@ -308,7 +220,6 @@ final class CameraConfigurationManager {
     }
 
     private void setZoom(Camera.Parameters parameters) {
-
         String zoomSupportedString = parameters.get("zoom-supported");
         if (zoomSupportedString != null && !Boolean.parseBoolean(zoomSupportedString)) {
             return;
@@ -324,7 +235,6 @@ final class CameraConfigurationManager {
                     tenDesiredZoom = tenMaxZoom;
                 }
             } catch (NumberFormatException nfe) {
-                Log.w(TAG, "Bad max-zoom: " + maxZoomString);
             }
         }
 
@@ -336,7 +246,6 @@ final class CameraConfigurationManager {
                     tenDesiredZoom = tenMaxZoom;
                 }
             } catch (NumberFormatException nfe) {
-                Log.w(TAG, "Bad taking-picture-zoom-max: " + takingPictureZoomMaxString);
             }
         }
 
@@ -357,22 +266,11 @@ final class CameraConfigurationManager {
                 // continue
             }
         }
-
-        // Set zoom. This helps encourage the user to pull back.
-        // Some devices like the Behold have a zoom parameter
         if (maxZoomString != null || motZoomValuesString != null) {
             parameters.set("zoom", String.valueOf(tenDesiredZoom / 10.0));
         }
-
-        // Most devices, like the Hero, appear to expose this zoom parameter.
-        // It takes on values like "27" which appears to mean 2.7x zoom
         if (takingPictureZoomMaxString != null) {
             parameters.set("taking-picture-zoom", tenDesiredZoom);
         }
     }
-
-    public static int getDesiredSharpness() {
-        return DESIRED_SHARPNESS;
-    }
-
 }
