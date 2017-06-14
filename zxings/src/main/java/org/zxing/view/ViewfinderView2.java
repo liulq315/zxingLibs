@@ -171,7 +171,7 @@ public final class ViewfinderView2 extends AbViewfinderView {
         scannerAlpha = (scannerAlpha + 1) % SCANNER_ALPHA.length;
 
         // 将扫描线修改为上下走的线
-        if ((i += 3) < frame.bottom - frame.top) {
+        if ((i += 6) < frame.bottom - frame.top) {
             mRect.set(frame.left - 6, frame.top + i - 6, frame.right + 6,
                     frame.top + 6 + i);
             lineDrawable.setBounds(mRect);

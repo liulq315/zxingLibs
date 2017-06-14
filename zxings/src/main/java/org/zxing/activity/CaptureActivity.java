@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceHolder.Callback;
 import android.view.SurfaceView;
@@ -35,8 +36,8 @@ public abstract class CaptureActivity extends AppCompatActivity implements Callb
 
     private CaptureActivityHandler handler;
     private boolean hasSurface;
-    private Vector<BarcodeFormat> decodeFormats;
-    private String characterSet;
+//    private Vector<BarcodeFormat> decodeFormats;
+//    private String characterSet;
     protected InactivityTimer inactivityTimer;
     private static final long VIBRATE_DURATION = 200L;
     private boolean mLightOn = false;
@@ -61,8 +62,8 @@ public abstract class CaptureActivity extends AppCompatActivity implements Callb
         } else {
             initCamera(surfaceHolder, getSurfaceView().getWidth(), getSurfaceView().getHeight());
         }
-        decodeFormats = null;
-        characterSet = null;
+//        decodeFormats = null;
+//        characterSet = null;
 
     }
 
@@ -90,22 +91,20 @@ public abstract class CaptureActivity extends AppCompatActivity implements Callb
      * @param result
      * @param barcode
      */
-    public void handleDecode(Result result, Bitmap barcode) {
+    public void handleDecode(Result result, String barcode) {
         vibrate();
+        Log.e("End----->","end - time = "+System.currentTimeMillis());
     }
 
     private void initCamera(SurfaceHolder surfaceHolder, int width, int height) {
         try {
-            CameraManager.get().openDriver(surfaceHolder, width, height);
+            this.handler =  CameraManager.get().openDriver(this,surfaceHolder, width, height);
         } catch (IOException ioe) {
             showTipAndExit(ioe.getMessage());
             return;
         } catch (RuntimeException e) {
             showTipAndExit(e.getMessage());
             return;
-        }
-        if (this.handler == null) {
-            this.handler = new CaptureActivityHandler(this, this.decodeFormats, this.characterSet);
         }
     }
 
@@ -208,7 +207,7 @@ public abstract class CaptureActivity extends AppCompatActivity implements Callb
             if (result == null) {
                 Toast.makeText(activity.getApplicationContext(), "未发现二维码", Toast.LENGTH_SHORT).show();
             } else {
-                activity.handleDecode(result, QRCodeDecoder.getDecodeAbleBitmap(this.path));
+                activity.handleDecode(result,  (this.path));
             }
         }
     }

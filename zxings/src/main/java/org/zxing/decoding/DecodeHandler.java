@@ -29,10 +29,12 @@ import com.google.zxing.ReaderException;
 import com.google.zxing.Result;
 import com.google.zxing.common.HybridBinarizer;
 
+import org.zxing.Utils;
 import org.zxing.activity.CaptureActivity;
 import org.zxing.camera.CameraManager;
 import org.zxing.camera.PlanarYUVLuminanceSource;
 
+import java.io.IOException;
 import java.util.Hashtable;
 
 final class DecodeHandler extends Handler {
@@ -101,10 +103,16 @@ final class DecodeHandler extends Handler {
             Log.d(TAG, "Found barcode (" + (end - start) + " ms):\n" + rawResult.toString());
             Message message = Message.obtain(activity.getHandler(), CaptureActivityHandler.decode_succeeded, rawResult);
             Bundle bundle = new Bundle();
-            bundle.putParcelable(DecodeThread.BARCODE_BITMAP, source.renderCroppedGreyscaleBitmap());
-            message.setData(bundle);
-            //Log.d(TAG, "Sending decode succeeded message...");
-            message.sendToTarget();
+            try {
+               String path =  Utils.saveImage(activity.getApplicationContext(),source.renderCroppedGreyscaleBitmap());
+                bundle.putString(DecodeThread.BARCODE_BITMAP,  path);
+
+            } finally {
+                message.setData(bundle);
+                //Log.d(TAG, "Sending decode succeeded message...");
+                message.sendToTarget();
+            }
+
         } else {
             Message message = Message.obtain(activity.getHandler(), CaptureActivityHandler.decode_failed);
             message.sendToTarget();

@@ -31,6 +31,9 @@ import android.view.SurfaceHolder;
 
 import com.google.zxing.ResultPoint;
 
+import org.zxing.activity.CaptureActivity;
+import org.zxing.decoding.CaptureActivityHandler;
+
 /**
  * This object wraps the Camera service object and expects to be the only one talking to it. The
  * implementation encapsulates the steps needed to take preview-sized images, which are used for
@@ -120,7 +123,7 @@ public final class CameraManager {
      * @param holder The surface object which the camera will draw preview frames into.
      * @throws IOException Indicates the camera driver failed to open.
      */
-    public void openDriver(SurfaceHolder holder, int widths, int heights) throws IOException {
+    public CaptureActivityHandler openDriver(CaptureActivity activity, SurfaceHolder holder, int widths, int heights) throws IOException {
         if (camera == null) {
             camera = Camera.open();
             if (camera == null) {
@@ -133,15 +136,11 @@ public final class CameraManager {
                 configManager.initFromCameraParameters(camera, widths, heights);
             }
             configManager.setDesiredCameraParameters(camera);
-
-            //FIXME
-            //     SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-            //
-//      if (prefs.getBoolean(PreferencesActivity.KEY_FRONT_LIGHT, false)) {
-//        FlashlightManager.enableFlashlight();
-//      }
             FlashlightManager.enableFlashlight();
+            return activity.getHandler() == null ? new CaptureActivityHandler(activity, null, null) : (CaptureActivityHandler) activity.getHandler();
         }
+
+        return null;
     }
 
     /**
@@ -163,6 +162,7 @@ public final class CameraManager {
             if (camera != null && !previewing) {
                 camera.startPreview();
                 previewing = true;
+                Log.e("sta----->", "sta - time = " + System.currentTimeMillis());
             }
         } catch (Exception e) {
         }

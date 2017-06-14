@@ -30,10 +30,12 @@ import android.view.SurfaceView;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.Result;
 
+import org.zxing.Utils;
 import org.zxing.activity.CaptureActivity;
 import org.zxing.camera.CameraManager;
 import org.zxing.view.ViewfinderResultPointCallback;
 
+import java.io.IOException;
 import java.util.Vector;
 
 /**
@@ -95,10 +97,9 @@ public final class CaptureActivityHandler extends Handler {
                 Bundle bundle = message.getData();
                 quitSynchronously();
                 /***********************************************************************/
-                Bitmap barcode = bundle == null ? null :
-                        (Bitmap) bundle.getParcelable(DecodeThread.BARCODE_BITMAP);//���ñ����߳�
-
-                activity.handleDecode((Result) message.obj, barcode);//���ؽ��
+                String path = bundle == null ? null :
+                        bundle.getString(DecodeThread.BARCODE_BITMAP);//���ñ����߳�
+                activity.handleDecode((Result) message.obj, path);
 
                 /***********************************************************************/
                 break;

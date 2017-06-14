@@ -35,7 +35,7 @@ import org.zxing.activity.CaptureActivity;
  */
 final class DecodeThread extends Thread {
 
-  public static final String BARCODE_BITMAP = "barcode_bitmap";
+  public static final String BARCODE_BITMAP = "barcode_file";
   private final CaptureActivity activity;
   private final Hashtable<DecodeHintType, Object> hints;
   private Handler handler;

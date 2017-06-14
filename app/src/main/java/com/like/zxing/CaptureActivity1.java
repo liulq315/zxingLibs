@@ -5,6 +5,9 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -41,12 +44,13 @@ public class CaptureActivity1 extends CaptureActivity {
 
     @Override
     public SurfaceView getSurfaceView() {
-        return (SurfaceView) findViewById(R.id.preview_view);
+        SurfaceView surfaceView = (SurfaceView) findViewById(R.id.preview_view);
+        return surfaceView;
     }
 
 
     @Override
-    public void handleDecode(Result result, Bitmap barcode) {
+    public void handleDecode(Result result, String barcode) {
         super.handleDecode(result, barcode);
         String resultString = result.getText();
         //FIXME
@@ -57,7 +61,7 @@ public class CaptureActivity1 extends CaptureActivity {
 //			System.out.println("Result:"+resultString);
             Intent resultIntent = new Intent();
             Bundle bundle = new Bundle();
-            bundle.putParcelable("barcode", barcode);
+            bundle.putString("path", barcode);
             bundle.putString("result", resultString);
             resultIntent.putExtras(bundle);
             this.setResult(RESULT_OK, resultIntent);

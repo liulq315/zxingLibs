@@ -65,6 +65,7 @@ final class CameraConfigurationManager {
             width = height;
             height = temp;
         }
+
         cameraResolution = getCameraResolution(parameters, new Point(width, height));
         Log.d(TAG, "Camera resolution: " + screenResolution);
     }
@@ -77,26 +78,42 @@ final class CameraConfigurationManager {
      */
     void setDesiredCameraParameters(Camera camera) {
         Camera.Parameters parameters = camera.getParameters();
-        List<Camera.Size> supportedPreviewSizes = parameters.getSupportedPreviewSizes();
-        int position = 0;
-        int sieze = 2;
-        if (supportedPreviewSizes.size() > sieze) {
-            position = supportedPreviewSizes.size() / sieze + 1;//supportedPreviewSizes.get();
-        } else {
-            position = supportedPreviewSizes.size() / sieze;
-        }
-        int width = supportedPreviewSizes.get(position).width;
-        int height = supportedPreviewSizes.get(position).height;
         Log.d(TAG, "Setting preview size: " + cameraResolution);
-
-        cameraResolution.x = width;
-        cameraResolution.y = height;
-        parameters.setPreviewSize(width, height);
+        parameters.setPreviewSize(cameraResolution.x, cameraResolution.y);
         setFlash(parameters);
         setZoom(parameters);
         camera.setDisplayOrientation(getDisplayOrientation());
         camera.setParameters(parameters);
     }
+
+    public static final int ALLOW_PIC_LEN = 900;
+
+    /**
+     * 返回合适的预览尺寸参数
+     *
+     * @param camera
+     * @return
+     */
+    private Camera.Size findFitPreResolution(Camera camera) throws Exception {
+        Camera.Parameters cameraParameters = camera.getParameters();
+        List<Camera.Size> supportedPicResolutions = cameraParameters.getSupportedPreviewSizes();
+
+        Camera.Size resultSize = null;
+        for (Camera.Size size : supportedPicResolutions) {
+            if (size.width <= ALLOW_PIC_LEN) {
+                if (resultSize == null) {
+                    resultSize = size;
+                } else if (size.width > resultSize.width) {
+                    resultSize = size;
+                }
+            }
+        }
+        if (resultSize == null) {
+            return supportedPicResolutions.get(0);
+        }
+        return resultSize;
+    }
+
 
     Point getCameraResolution() {
         return cameraResolution;
@@ -267,7 +284,7 @@ final class CameraConfigurationManager {
             }
         }
         if (maxZoomString != null || motZoomValuesString != null) {
-            parameters.set("zoom", String.valueOf(tenDesiredZoom / 10.0));
+            parameters.set("zoom", String.valueOf(tenDesiredZoom / 10.0d));
         }
         if (takingPictureZoomMaxString != null) {
             parameters.set("taking-picture-zoom", tenDesiredZoom);

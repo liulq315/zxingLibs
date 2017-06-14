@@ -7,6 +7,7 @@ import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -14,6 +15,8 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.text.TextUtils;
+import android.util.Log;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
@@ -21,6 +24,15 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Hashtable;
 
 public final class Utils {
@@ -46,45 +58,6 @@ public final class Utils {
         return false;
     }
 
-    public static boolean isChineseCharacter(String chineseStr) {
-        char[] charArray = chineseStr.toCharArray();
-
-        for (int i = 0; i < charArray.length; ++i) {
-            if ((charArray[i] < 0 || charArray[i] >= '�') && (charArray[i] <= '�' || charArray[i] >= '\uffff')) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    public static Drawable generateQRCode(Context context, String info, int[] size) {
-        try {
-            Hashtable e = new Hashtable();
-            e.put(EncodeHintType.CHARACTER_SET, "utf-8");
-            int qrWidth = size[0];
-            int qrHeith = size[1];
-            BitMatrix bitMatrix = (new QRCodeWriter()).encode(info, BarcodeFormat.QR_CODE, qrWidth, qrHeith, e);
-            int[] pixels = new int[qrWidth * qrHeith];
-
-            for (int bitmap = 0; bitmap < qrHeith; ++bitmap) {
-                for (int x = 0; x < qrWidth; ++x) {
-                    if (bitMatrix.get(x, bitmap)) {
-                        pixels[bitmap * qrWidth + x] = -16777216;
-                    } else {
-                        pixels[bitmap * qrWidth + x] = -1;
-                    }
-                }
-            }
-
-            Bitmap var11 = Bitmap.createBitmap(qrWidth, qrHeith, Bitmap.Config.ARGB_8888);
-            var11.setPixels(pixels, 0, qrWidth, 0, 0, qrWidth, qrHeith);
-            return new BitmapDrawable(context.getResources(), var11);
-        } catch (WriterException var10) {
-            var10.printStackTrace();
-            return null;
-        }
-    }
 
     @SuppressLint({"NewApi"})
     public static String getPath(Context context, Uri uri) {
@@ -173,4 +146,57 @@ public final class Utils {
     public static boolean isMediaDocument(Uri uri) {
         return "com.android.providers.media.documents".equals(uri.getAuthority());
     }
+
+    public static String saveImage(Context context, Bitmap bmp) {
+        File appDir = new File(context.getExternalCacheDir(), "zxing");
+        if (!appDir.exists()) {
+            appDir.mkdir();
+        }
+        String fileName = "icon_zxing.jpg";
+        File file = new File(appDir, fileName);
+        try {
+            FileOutputStream fos = new FileOutputStream(file);
+            bmp.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            fos.flush();
+            fos.close();
+            return file.getAbsolutePath();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return file.getAbsolutePath();
+    }
+    /**
+     * @param path
+     * @return
+     * @throws IOException
+     */
+    public static Bitmap revitionImageSize(String path) throws IOException {
+        if (!(!TextUtils.isEmpty(path) && new File(path).exists())) {
+            return null;
+        }
+        BufferedInputStream in = new BufferedInputStream(new FileInputStream(new File(path)));
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeStream(in, null, options);
+        in.close();
+        int i = 0;
+        Bitmap bitmap = null;
+        while (true) {
+            if ((options.outWidth >> i <= 1000)
+                    && (options.outHeight >> i <= 1000)) {
+                in = new BufferedInputStream(
+                        new FileInputStream(new File(path)));
+                options.inSampleSize = (int) Math.pow(2, i);
+                options.inJustDecodeBounds = false;
+                bitmap = BitmapFactory.decodeStream(in, null, options);
+                break;
+            }
+            i += 1;
+        }
+
+        return bitmap;
+    }
+
 }

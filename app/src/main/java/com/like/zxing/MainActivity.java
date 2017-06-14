@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -12,7 +13,10 @@ import android.widget.TextView;
 
 import com.google.zxing.WriterException;
 
+import org.zxing.Utils;
 import org.zxing.encoding.QRCodeUtil;
+
+import java.io.IOException;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -38,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 EditText text = (EditText) findViewById(R.id.editText);
                 try {
-                    show.setImageBitmap(QRCodeUtil.createQRImage(text.getText().toString(), dip2px(150), BitmapFactory.decodeResource(getResources(),R.drawable.ic_launcher)));
+                    show.setImageBitmap(QRCodeUtil.createQRImage(text.getText().toString(), dip2px(150), BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher)));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -69,9 +73,13 @@ public class MainActivity extends AppCompatActivity {
         //处理扫描结果（在界面上显示）
         if (resultCode == RESULT_OK) {
             Bundle bundle = data.getExtras();
-            Bitmap barcode = bundle.getParcelable("barcode");
-            if (barcode != null)
-                show.setImageBitmap(barcode);
+            String path = bundle.getString("path");
+            if (!TextUtils.isEmpty(path))
+                try {
+                    show.setImageBitmap(Utils.revitionImageSize(path));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             String scanResult = bundle.getString("result");
             resultTextView.setText(scanResult);
         }
