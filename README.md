@@ -17,3 +17,12 @@ allprojects {
 }
 
 2、compile 'org.lqos.zxing:zxings:1.1.0'
+
+
+
+继承CaptureActivity 实现几个方法 getSurfaceView()、getViewfinderView()后，
+
+自动开启扫描二维码
+
+重写该方法： handleDecode(Result result, String barcode) 得到扫描结果和二维码截图保存路径
+
