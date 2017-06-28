@@ -1,24 +1,31 @@
 package org.zxing.activity;
 
+import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
+import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceHolder.Callback;
 import android.view.SurfaceView;
 import android.widget.Toast;
 
-import com.google.zxing.BarcodeFormat;
 import com.google.zxing.Result;
 
 import org.zxing.Utils;
@@ -30,14 +37,10 @@ import org.zxing.encoding.QRCodeDecoder;
 import org.zxing.view.AbViewfinderView;
 
 import java.io.IOException;
-import java.util.Vector;
 
 public abstract class CaptureActivity extends AppCompatActivity implements Callback {
 
-    private CaptureActivityHandler handler;
     private boolean hasSurface;
-//    private Vector<BarcodeFormat> decodeFormats;
-//    private String characterSet;
     protected InactivityTimer inactivityTimer;
     private static final long VIBRATE_DURATION = 200L;
     private boolean mLightOn = false;
@@ -50,20 +53,68 @@ public abstract class CaptureActivity extends AppCompatActivity implements Callb
         inactivityTimer = new InactivityTimer(this);
     }
 
+    boolean askedPermission = false;
+
+    @TargetApi(23)
+    private void openCameraWithPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                == PackageManager.PERMISSION_GRANTED) {
+            startInit();
+        } else if (!askedPermission) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.CAMERA},
+                    0x456);
+            askedPermission = true;
+        } else {
+            showTipAndExit("");
+        }
+    }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        SurfaceView surfaceView = getSurfaceView();
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+
+        if (requestCode == 0x456) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                initCamera(surfaceView.getHolder(), getSurfaceView().getWidth(), getSurfaceView().getHeight());
+            } else {
+                showTipAndExit("");
+            }
+            return;
+        } else if (requestCode == 0x457) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                photo();
+            } else {
+                Toast.makeText(getApplicationContext(), "获取文件读写权限失败", Toast.LENGTH_SHORT).show();
+            }
+            return;
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+    }
+
+    SurfaceView surfaceView;
+
+    private void startInit() {
         SurfaceHolder surfaceHolder = surfaceView.getHolder();
+        Log.e("onResume", "hasSurface = " + hasSurface);
         if (!hasSurface) {
             surfaceHolder.addCallback(this);
             surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
         } else {
             initCamera(surfaceHolder, getSurfaceView().getWidth(), getSurfaceView().getHeight());
         }
-//        decodeFormats = null;
-//        characterSet = null;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        surfaceView = getSurfaceView();
+        if (Build.VERSION.SDK_INT >= 23) {
+            openCameraWithPermission();
+        } else {
+            startInit();
+        }
+
 
     }
 
@@ -72,11 +123,10 @@ public abstract class CaptureActivity extends AppCompatActivity implements Callb
     @Override
     protected void onPause() {
         super.onPause();
-        if (handler != null) {
-            handler.quitSynchronously();
-            handler = null;
+        if (CaptureActivityHandler.getHandler() != null) {
+            CaptureActivityHandler.getHandler().quitSynchronously();
         }
-        hasSurface = false;
+        CameraManager.get().closeDriver();
     }
 
     @Override
@@ -93,12 +143,12 @@ public abstract class CaptureActivity extends AppCompatActivity implements Callb
      */
     public void handleDecode(Result result, String barcode) {
         vibrate();
-        Log.e("End----->","end - time = "+System.currentTimeMillis());
+        Log.e("End----->", "end - time = " + System.currentTimeMillis());
     }
 
     private void initCamera(SurfaceHolder surfaceHolder, int width, int height) {
         try {
-            this.handler =  CameraManager.get().openDriver(this,surfaceHolder, width, height);
+            CameraManager.get().openDriver(this, surfaceHolder, width, height);
         } catch (IOException ioe) {
             showTipAndExit(ioe.getMessage());
             return;
@@ -118,6 +168,7 @@ public abstract class CaptureActivity extends AppCompatActivity implements Callb
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width,
                                int height) {
+        Log.e("surfaceChanged", " hasSurface =" + hasSurface);
         if (hasSurface) {
             initCamera(holder, width, height);
         }
@@ -125,6 +176,7 @@ public abstract class CaptureActivity extends AppCompatActivity implements Callb
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
+        Log.e("surfaceCreated", " hasSurface =" + hasSurface);
         if (!hasSurface) {
             hasSurface = true;
         }
@@ -134,13 +186,11 @@ public abstract class CaptureActivity extends AppCompatActivity implements Callb
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
         hasSurface = false;
+        Log.e("surfaceDestroyed", " hasSurface =" + hasSurface);
+        getSurfaceView().getHolder().removeCallback(this);
     }
 
     public abstract AbViewfinderView getViewfinderView();
-
-    public Handler getHandler() {
-        return handler;
-    }
 
     public void drawViewfinder() {
         getViewfinderView().drawViewfinder();
@@ -160,17 +210,12 @@ public abstract class CaptureActivity extends AppCompatActivity implements Callb
         if (resultCode == RESULT_OK) {
             switch (requestCode) {
                 case 234:
-                    String[] proj = new String[]{"_data"};
-                    Cursor cursor = this.getContentResolver().query(data.getData(), proj, (String) null, (String[]) null, (String) null);
-                    if (cursor.moveToFirst()) {
-                        int column_index = cursor.getColumnIndexOrThrow("_data");
-                        photo_path = cursor.getString(column_index);
-                        if (photo_path == null) {
-                            photo_path = Utils.getPath(this.getApplicationContext(), data.getData());
-                        }
+
+                    photo_path = getSelectMediaPath(data);
+                    if (TextUtils.isEmpty(photo_path)) {
+                        photo_path = Utils.getPath(this.getApplicationContext(), data.getData());
                     }
-                    cursor.close();
-                    new AsyncTasks(this, this.photo_path).execute();
+                    new AsyncTasks(this).execute(this.photo_path);
                     break;
 
                 default:
@@ -181,13 +226,31 @@ public abstract class CaptureActivity extends AppCompatActivity implements Callb
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+    private String getSelectMediaPath(Intent data) {
+        String path = "";
+        Uri uri = data.getData(); // 获取别选中图片的uri
+        if (uri.toString().contains("file:///")) {
+            path = uri.toString().replace("file:///", "");
+        } else {
+            String[] filePathColumn = new String[]{MediaStore.Images.Media.DATA}; // 获取图库图片路径
+            Cursor cursor = getContentResolver().query(uri,
+                    filePathColumn, null, null, null); // 查询选中图片路径
+            if (cursor != null) {
+                cursor.moveToFirst();
+                path = cursor.getString(cursor
+                        .getColumnIndex(filePathColumn[0]));
+                cursor.close();
+            }
+        }
+        return path;
+    }
+
     static class AsyncTasks extends AsyncTask<String, Void, Result> {
         CaptureActivity activity;
         String path;
 
-        public AsyncTasks(CaptureActivity captureActivity, String path) {
+        public AsyncTasks(CaptureActivity captureActivity) {
             activity = captureActivity;
-            this.path = path;
         }
 
         @Override
@@ -198,6 +261,8 @@ public abstract class CaptureActivity extends AppCompatActivity implements Callb
 
         @Override
         protected Result doInBackground(String... params) {
+            Log.e("path - ", "" + params[0]);
+            this.path = params[0];
             return QRCodeDecoder.syncDecodeQRCode(path);
         }
 
@@ -207,30 +272,26 @@ public abstract class CaptureActivity extends AppCompatActivity implements Callb
             if (result == null) {
                 Toast.makeText(activity.getApplicationContext(), "未发现二维码", Toast.LENGTH_SHORT).show();
             } else {
-                activity.handleDecode(result,  (this.path));
+                activity.handleDecode(result, (this.path));
             }
         }
     }
 
     protected void photo() {
-        Intent innerIntent = new Intent();
-        if (Build.VERSION.SDK_INT < 19) {
-            innerIntent.setAction("android.intent.action.GET_CONTENT");
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_GRANTED) {
+            Intent innerIntent = new Intent(Intent.ACTION_PICK,
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            innerIntent.setType("image/*");
+            Intent wrapperIntent = Intent.createChooser(innerIntent, "选择二维码图片");
+            this.startActivityForResult(wrapperIntent, 234);
         } else {
-            innerIntent.setAction("android.intent.action.OPEN_DOCUMENT");
-        }
-
-        innerIntent.setType("image/*");
-        Intent wrapperIntent = Intent.createChooser(innerIntent, "选择二维码图片");
-        this.startActivityForResult(wrapperIntent, 234);
-    }
-
-    static class Listener implements OnCompletionListener {
-        public void onCompletion(MediaPlayer mediaPlayer) {
-            mediaPlayer.seekTo(0);
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    0x457);
         }
     }
-
 
     protected void lightOnAndOff() {
         if (this.mLightOn)

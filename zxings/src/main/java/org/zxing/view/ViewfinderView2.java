@@ -53,7 +53,7 @@ public final class ViewfinderView2 extends AbViewfinderView {
     private static final int MAX_RESULT_POINTS = 20;
 
     private Bitmap resultBitmap;
-    private Drawable lineDrawable;// 采用图片作为扫描线
+//    private Drawable lineDrawable;// 采用图片作为扫描线
     /**
      * 遮掩层的颜色
      */
@@ -79,7 +79,7 @@ public final class ViewfinderView2 extends AbViewfinderView {
         Resources resources = getResources();
         maskColor = resources.getColor(R.color.viewfinder_mask); // 遮掩层颜色
         resultColor = resources.getColor(R.color.result_view);
-        lineDrawable = getResources().getDrawable(R.drawable.scan_laser);
+//        lineDrawable = getResources().getDrawable(R.drawable.scan_lasters);
         resultPointColor = resources.getColor(R.color.possible_result_points);
         possibleResultPoints = new ArrayList<ResultPoint>(5);
         lastPossibleResultPoints = null;
@@ -163,19 +163,18 @@ public final class ViewfinderView2 extends AbViewfinderView {
         }
 
         // 在扫描框中画出模拟扫描的线条
-        // 设置扫描线条颜色为绿色
-        paint.setColor(Color.GREEN);
+        paint.setColor(getResources().getColor(R.color.viewfinder_laser));
         // 设置绿色线条的透明值
         paint.setAlpha(SCANNER_ALPHA[scannerAlpha]);
         // 透明度变化
         scannerAlpha = (scannerAlpha + 1) % SCANNER_ALPHA.length;
-
+        paint.setStrokeWidth((dip2px(getContext(), 2)));
         // 将扫描线修改为上下走的线
-        if ((i += 6) < frame.bottom - frame.top) {
+        if ((i += 4) < frame.bottom - frame.top) {
             mRect.set(frame.left - 6, frame.top + i - 6, frame.right + 6,
                     frame.top + 6 + i);
-            lineDrawable.setBounds(mRect);
-            lineDrawable.draw(canvas);
+            canvas.drawLine(frame.left - 6, frame.top + i - 6, frame.right + 6,
+                    frame.top + 6 + i, paint);
             invalidate();
         } else {
             i = 0;
@@ -214,7 +213,7 @@ public final class ViewfinderView2 extends AbViewfinderView {
         int crap = 5;
 
         // 画出四个角
-        paint.setColor(Color.GREEN);
+        paint.setColor(getResources().getColor(R.color.viewfinder_laser));
         // 左上角
         canvas.drawRect(frame.left, frame.top, frame.left + length,
                 frame.top + crap, paint);
@@ -276,4 +275,10 @@ public final class ViewfinderView2 extends AbViewfinderView {
             }
         }
     }
+
+    public static int dip2px(Context context, float dpValue) {
+        final float scale = context.getResources().getDisplayMetrics().density;
+        return (int) (dpValue * scale + 0.5f);
+    }
+
 }

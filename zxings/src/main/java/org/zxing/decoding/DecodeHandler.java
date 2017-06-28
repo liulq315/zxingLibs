@@ -101,7 +101,7 @@ final class DecodeHandler extends Handler {
         if (rawResult != null) {
             long end = System.currentTimeMillis();
             Log.d(TAG, "Found barcode (" + (end - start) + " ms):\n" + rawResult.toString());
-            Message message = Message.obtain(activity.getHandler(), CaptureActivityHandler.decode_succeeded, rawResult);
+            Message message = Message.obtain(CaptureActivityHandler.getHandler(), CaptureActivityHandler.decode_succeeded, rawResult);
             Bundle bundle = new Bundle();
             try {
                String path =  Utils.saveImage(activity.getApplicationContext(),source.renderCroppedGreyscaleBitmap());
@@ -114,7 +114,7 @@ final class DecodeHandler extends Handler {
             }
 
         } else {
-            Message message = Message.obtain(activity.getHandler(), CaptureActivityHandler.decode_failed);
+            Message message = Message.obtain(CaptureActivityHandler.getHandler(), CaptureActivityHandler.decode_failed);
             message.sendToTarget();
         }
     }

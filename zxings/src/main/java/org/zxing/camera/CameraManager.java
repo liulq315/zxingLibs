@@ -16,8 +16,6 @@
 
 package org.zxing.camera;
 
-import java.io.IOException;
-
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
@@ -25,7 +23,6 @@ import android.graphics.Rect;
 import android.hardware.Camera;
 import android.os.Build;
 import android.os.Handler;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
@@ -33,6 +30,8 @@ import com.google.zxing.ResultPoint;
 
 import org.zxing.activity.CaptureActivity;
 import org.zxing.decoding.CaptureActivityHandler;
+
+import java.io.IOException;
 
 /**
  * This object wraps the Camera service object and expects to be the only one talking to it. The
@@ -124,6 +123,7 @@ public final class CameraManager {
      * @throws IOException Indicates the camera driver failed to open.
      */
     public CaptureActivityHandler openDriver(CaptureActivity activity, SurfaceHolder holder, int widths, int heights) throws IOException {
+        Log.e("CHandler openDriver", "camera ?= " + (camera == null));
         if (camera == null) {
             camera = Camera.open();
             if (camera == null) {
@@ -137,7 +137,12 @@ public final class CameraManager {
             }
             configManager.setDesiredCameraParameters(camera);
             FlashlightManager.enableFlashlight();
-            return activity.getHandler() == null ? new CaptureActivityHandler(activity, null, null) : (CaptureActivityHandler) activity.getHandler();
+            if (CaptureActivityHandler.getHandler() == null) {
+                CaptureActivityHandler.initHandler(activity, null, null);
+            }
+            return CaptureActivityHandler.getHandler();
+        } else {
+            startPreview();
         }
 
         return null;
@@ -148,8 +153,11 @@ public final class CameraManager {
      */
     public void closeDriver() {
         if (camera != null) {
+            stopPreview();
             FlashlightManager.disableFlashlight();
             camera.release();
+            previewing = false;
+            initialized = false;
             camera = null;
         }
     }

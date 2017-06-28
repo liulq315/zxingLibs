@@ -46,9 +46,20 @@ public final class CaptureActivityHandler extends Handler {
     private static final String TAG = CaptureActivityHandler.class.getSimpleName();
 
     private final CaptureActivity activity;
+    private static CaptureActivityHandler handler;
     private final DecodeThread decodeThread;
     private State state;
 
+    public static void initHandler(CaptureActivity activity, Vector<BarcodeFormat> decodeFormats,
+                                   String characterSet) {
+        if (handler == null) {
+            handler = new CaptureActivityHandler(activity, decodeFormats, characterSet);
+        }
+    }
+
+    public static CaptureActivityHandler getHandler() {
+        return handler;
+    }
 
     private enum State {
         PREVIEW,
@@ -56,8 +67,8 @@ public final class CaptureActivityHandler extends Handler {
         DONE
     }
 
-    public CaptureActivityHandler(CaptureActivity activity, Vector<BarcodeFormat> decodeFormats,
-                                  String characterSet) {
+    private CaptureActivityHandler(CaptureActivity activity, Vector<BarcodeFormat> decodeFormats,
+                                   String characterSet) {
         this.activity = activity;
         decodeThread = new DecodeThread(activity, decodeFormats, characterSet,
                 new ViewfinderResultPointCallback(activity.getViewfinderView()));
@@ -129,18 +140,18 @@ public final class CaptureActivityHandler extends Handler {
         Message quit = Message.obtain(decodeThread.getHandler(), DecodeHandler.quit);
         quit.sendToTarget();
         try {
-            SurfaceView surfaceView = activity.getSurfaceView();
-            SurfaceHolder surfaceHolder = surfaceView.getHolder();
-            surfaceHolder.removeCallback(activity);
+//            SurfaceView surfaceView = activity.getSurfaceView();
+//            SurfaceHolder surfaceHolder = surfaceView.getHolder();
+//            surfaceHolder.removeCallback(activity);
             CameraManager.get().closeDriver();
             decodeThread.join();
         } catch (Exception e) {
             // continue
+        } finally {
+            removeMessages(decode_succeeded);
+            removeMessages(decode_failed);
+            handler = null;
         }
-
-        // Be absolutely sure we don't send any queued up messages
-        removeMessages(decode_succeeded);
-        removeMessages(decode_failed);
     }
 
     private void restartPreviewAndDecode() {
