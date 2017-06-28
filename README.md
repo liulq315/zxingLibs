@@ -7,7 +7,7 @@ android 实现 二维码快速扫描功能
 
 引用方式：
 
-1、compile 'com.github.zy-mylike:zxingLibs:v1.1.0'
+1、compile 'com.github.zy-mylike:zxingLibs:v1.1.2'
 
 allprojects {
     repositories {
@@ -16,7 +16,7 @@ allprojects {
     }
 }
 
-2、compile 'org.lqos.zxing:zxings:1.1.0'
+2、compile 'org.lqos.zxing:zxings:1.1.2'
 
 
 
