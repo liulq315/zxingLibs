@@ -28,7 +28,7 @@ import java.util.List;
  *
  * @author dswitkin@google.com (Daniel Switkin)
  */
-public final class ViewfinderView2 extends AbViewfinderView {
+public final class ViewfinderView extends AbViewfinderView {
 
 
     private static final int[] SCANNER_ALPHA = {0, 64, 128, 192, 255, 192,
@@ -42,7 +42,6 @@ public final class ViewfinderView2 extends AbViewfinderView {
     private static final int CURRENT_POINT_OPACITY = 0xA0;
     private int i = 0;// 添加的
     private int scannerAlpha;
-    private Rect mRect;// 扫描线填充边界
 
     /**
      * 画笔对象的引用
@@ -58,7 +57,6 @@ public final class ViewfinderView2 extends AbViewfinderView {
      * 遮掩层的颜色
      */
     private final int maskColor;
-    private final int resultColor;
 
     private final int resultPointColor;
     private List<ResultPoint> possibleResultPoints;
@@ -71,15 +69,12 @@ public final class ViewfinderView2 extends AbViewfinderView {
     boolean isFirst = true;
 
     // This constructor is used when the class is built from an XML resource.
-    public ViewfinderView2(Context context, AttributeSet attrs) {
+    public ViewfinderView(Context context, AttributeSet attrs) {
         super(context, attrs);
         paint = new Paint(Paint.ANTI_ALIAS_FLAG); // 开启反锯齿
-        mRect = new Rect();
         scannerAlpha = 0;
         Resources resources = getResources();
         maskColor = resources.getColor(R.color.viewfinder_mask); // 遮掩层颜色
-        resultColor = resources.getColor(R.color.result_view);
-//        lineDrawable = getResources().getDrawable(R.drawable.scan_lasters);
         resultPointColor = resources.getColor(R.color.possible_result_points);
         possibleResultPoints = new ArrayList<ResultPoint>(5);
         lastPossibleResultPoints = null;
@@ -101,7 +96,7 @@ public final class ViewfinderView2 extends AbViewfinderView {
 
         // 画扫描框外部的暗色背景
         // 设置蒙板颜色
-        paint.setColor(resultBitmap != null ? resultColor : maskColor);
+        paint.setColor(maskColor);
         // 头部
         canvas.drawRect(0, 0, width, frame.top, paint);
         // 左边
@@ -170,11 +165,9 @@ public final class ViewfinderView2 extends AbViewfinderView {
         scannerAlpha = (scannerAlpha + 1) % SCANNER_ALPHA.length;
         paint.setStrokeWidth((dip2px(getContext(), 2)));
         // 将扫描线修改为上下走的线
-        if ((i += 4) < frame.bottom - frame.top) {
-            mRect.set(frame.left - 6, frame.top + i - 6, frame.right + 6,
-                    frame.top + 6 + i);
-            canvas.drawLine(frame.left - 6, frame.top + i - 6, frame.right + 6,
-                    frame.top + 6 + i, paint);
+        if ((i += 3) < frame.bottom - frame.top) {
+            canvas.drawLine(frame.left + 3, frame.top + i - 6, frame.left + frame.width() - 3,
+                    frame.top + i - 6, paint);
             invalidate();
         } else {
             i = 0;
@@ -191,7 +184,7 @@ public final class ViewfinderView2 extends AbViewfinderView {
         int height = canvas.getHeight();
 
         // Draw the exterior (i.e. outside the framing rect) darkened
-        paint.setColor(resultBitmap != null ? resultColor : maskColor);
+        paint.setColor(maskColor);
 
         // 画出扫描框外面的阴影部分，共四个部分，扫描框的上面到屏幕上面，扫描框的下面到屏幕下面
         // 扫描框的左边面到屏幕左边，扫描框的右边到屏幕右边

@@ -1,21 +1,16 @@
 package com.like.zxing;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.SurfaceView;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.zxing.Result;
 
 import org.zxing.activity.CaptureActivity;
 import org.zxing.view.AbViewfinderView;
-import org.zxing.view.ViewfinderView2;
+import org.zxing.view.ViewfinderView;
 
 public class CaptureActivity1 extends CaptureActivity {
 
@@ -39,7 +34,7 @@ public class CaptureActivity1 extends CaptureActivity {
 
     @Override
     public AbViewfinderView getViewfinderView() {
-        return (ViewfinderView2) findViewById(R.id.viewfinder_view);
+        return (ViewfinderView) findViewById(R.id.viewfinder_view);
     }
 
     @Override

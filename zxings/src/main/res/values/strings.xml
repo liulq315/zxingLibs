@@ -1,9 +1,7 @@
 <resources>
     <string name="app_name">zxingLibs</string>
 
-    <color name="result_view">#b0000000</color>
     <color name="possible_result_points">#c0ffff00</color>
-    <color name="viewfinder_frame">#ff000000</color>
     <color name="viewfinder_laser">#ff0000</color>
     <color name="viewfinder_mask">#60000000</color>
 </resources>
