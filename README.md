@@ -16,7 +16,7 @@ allprojects {
     }
 }
 
-2、compile 'org.lqos.zxing:zxings:1.1.2'
+2、compile 'org.lqos.zxing:zxings:1.1.2a'
 
 
 
