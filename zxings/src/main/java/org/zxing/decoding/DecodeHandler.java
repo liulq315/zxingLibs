@@ -92,31 +92,33 @@ final class DecodeHandler extends Handler {
         BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
         try {
             rawResult = multiFormatReader.decodeWithState(bitmap);
+            if (rawResult != null) {
+                long end = System.currentTimeMillis();
+                Message message = Message.obtain(CaptureActivityHandler.getHandler(), CaptureActivityHandler.decode_succeeded, rawResult);
+                Bundle bundle = new Bundle();
+                try {
+                    String path = Utils.saveImage(activity.getApplicationContext(), source.renderCroppedGreyscaleBitmap());
+                    bundle.putString(DecodeThread.BARCODE_BITMAP, path);
+                    message.setData(bundle);
+                    if (message != null)
+                        message.sendToTarget();
+                } finally {
+                    removeCallbacksAndMessages(null);
+                }
+
+            } else {
+                Message message = Message.obtain(CaptureActivityHandler.getHandler(), CaptureActivityHandler.decode_failed);
+                if (message != null)
+                    message.sendToTarget();
+            }
+
+
         } catch (ReaderException re) {
-            // continue
         } finally {
             multiFormatReader.reset();
         }
 
-        if (rawResult != null) {
-            long end = System.currentTimeMillis();
-            Log.d(TAG, "Found barcode (" + (end - start) + " ms):\n" + rawResult.toString());
-            Message message = Message.obtain(CaptureActivityHandler.getHandler(), CaptureActivityHandler.decode_succeeded, rawResult);
-            Bundle bundle = new Bundle();
-            try {
-               String path =  Utils.saveImage(activity.getApplicationContext(),source.renderCroppedGreyscaleBitmap());
-                bundle.putString(DecodeThread.BARCODE_BITMAP,  path);
 
-            } finally {
-                message.setData(bundle);
-                //Log.d(TAG, "Sending decode succeeded message...");
-                message.sendToTarget();
-            }
-
-        } else {
-            Message message = Message.obtain(CaptureActivityHandler.getHandler(), CaptureActivityHandler.decode_failed);
-            message.sendToTarget();
-        }
     }
 
 }

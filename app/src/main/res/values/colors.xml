@@ -2,7 +2,7 @@
 <resources>
     <color name="colorPrimary">#459DF5</color>
 
-    <color name="colorPrimaryDark">#aaffffff</color>
+    <color name="colorPrimaryDark">#459DF5</color>
     <color name="colorAccent">#459DF5</color>
 
     <color name="viewfinder_mask">#60000000</color>

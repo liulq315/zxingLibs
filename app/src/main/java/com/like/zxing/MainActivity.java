@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.google.zxing.WriterException;
 
 import org.zxing.Utils;
+import org.zxing.activity.CaptureActivity;
 import org.zxing.encoding.QRCodeUtil;
 
 import java.io.IOException;

@@ -22,6 +22,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -136,20 +137,21 @@ public final class CaptureActivityHandler extends Handler {
 
     public void quitSynchronously() {
         state = State.DONE;
-        CameraManager.get().stopPreview();
         Message quit = Message.obtain(decodeThread.getHandler(), DecodeHandler.quit);
         quit.sendToTarget();
+//        Looper looper = Looper.myLooper();
+//        looper.quit();
+        CameraManager.get().stopPreview();
         try {
-//            SurfaceView surfaceView = activity.getSurfaceView();
-//            SurfaceHolder surfaceHolder = surfaceView.getHolder();
-//            surfaceHolder.removeCallback(activity);
+            SurfaceView surfaceView = activity.getSurfaceView();
+            SurfaceHolder surfaceHolder = surfaceView.getHolder();
+            surfaceHolder.removeCallback(activity);
             CameraManager.get().closeDriver();
-            decodeThread.join();
+            decodeThread.exit(0);
         } catch (Exception e) {
             // continue
         } finally {
-            removeMessages(decode_succeeded);
-            removeMessages(decode_failed);
+            removeCallbacksAndMessages(null);
             handler = null;
         }
     }
@@ -157,6 +159,7 @@ public final class CaptureActivityHandler extends Handler {
     private void restartPreviewAndDecode() {
         if (state == State.SUCCESS) {
             state = State.PREVIEW;
+            decodeThread.exit(1);
             CameraManager.get().requestPreviewFrame(decodeThread.getHandler(), DecodeHandler.decode);
             CameraManager.get().requestAutoFocus(this, auto_focus);
             activity.drawViewfinder();

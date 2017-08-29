@@ -78,9 +78,7 @@ public final class ViewfinderView extends AbViewfinderView {
         resultPointColor = resources.getColor(R.color.possible_result_points);
         possibleResultPoints = new ArrayList<ResultPoint>(5);
         lastPossibleResultPoints = null;
-
     }
-
 
     @Override
     public void onDraw(Canvas canvas) {
@@ -165,7 +163,8 @@ public final class ViewfinderView extends AbViewfinderView {
         scannerAlpha = (scannerAlpha + 1) % SCANNER_ALPHA.length;
         paint.setStrokeWidth((dip2px(getContext(), 2)));
         // 将扫描线修改为上下走的线
-        if ((i += 3) < frame.bottom - frame.top) {
+        int h = frame.bottom - frame.top;
+        if ((i += h / 180) < frame.bottom - frame.top) {
             canvas.drawLine(frame.left + 3, frame.top + i - 6, frame.left + frame.width() - 3,
                     frame.top + i - 6, paint);
             invalidate();
