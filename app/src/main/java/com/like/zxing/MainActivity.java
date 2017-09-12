@@ -1,7 +1,6 @@
 package com.like.zxing;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -11,13 +10,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.google.zxing.WriterException;
+import org.loqs.zxing.encoding.EncodingHandler;
 
-import org.zxing.Utils;
-import org.zxing.activity.CaptureActivity;
-import org.zxing.encoding.QRCodeUtil;
-
-import java.io.IOException;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -34,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+//                startActivityForResult(new Intent(MainActivity.this, CaptureActivity.class), 0);
                 startActivityForResult(new Intent(MainActivity.this, CaptureActivity1.class), 0);
 //                startActivityForResult(new Intent(MainActivity.this, Main2Activity.class), 0);
             }
@@ -43,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 EditText text = (EditText) findViewById(R.id.editText);
                 try {
-                    show.setImageBitmap(QRCodeUtil.createQRImage(text.getText().toString(), dip2px(150), BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher)));
+                    show.setImageBitmap(EncodingHandler.createQRCode(text.getText().toString(), dip2px(150), dip2px(150), BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher)));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -76,11 +71,8 @@ public class MainActivity extends AppCompatActivity {
             Bundle bundle = data.getExtras();
             String path = bundle.getString("path");
             if (!TextUtils.isEmpty(path))
-                try {
-                    show.setImageBitmap(Utils.revitionImageSize(path));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                show.setImageBitmap(BitmapFactory.decodeFile(path));
+
             String scanResult = bundle.getString("result");
             resultTextView.setText(scanResult);
         }

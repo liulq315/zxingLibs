@@ -3,16 +3,12 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
 
-    <SurfaceView
-        android:id="@+id/preview_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center" />
+    <FrameLayout
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <org.zxing.view.ViewfinderView
-        android:id="@+id/viewfinder_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+    </FrameLayout>
 
     <Button
         android:id="@+id/button2"
@@ -20,12 +16,13 @@
         android:layout_height="wrap_content"
         android:onClick="ssButtonss"
         android:text="相册" />
+
     <Button
         android:id="@+id/open"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="ssopen"
         android:layout_gravity="bottom"
+        android:onClick="ssopen"
         android:text="打开手电筒" />
 
 </FrameLayout>

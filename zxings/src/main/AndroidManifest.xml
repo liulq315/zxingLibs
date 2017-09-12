@@ -2,9 +2,13 @@
 
     package="org.lqos.zxings">
 
-    <application android:allowBackup="true" android:label="@string/app_name"
+    <application
+        android:allowBackup="true"
+        android:label="@string/app_name"
         android:supportsRtl="true">
-
+        <activity
+            android:name="org.loqs.zxing.activity.CaptureActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

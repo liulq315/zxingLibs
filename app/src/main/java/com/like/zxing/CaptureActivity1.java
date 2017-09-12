@@ -1,66 +1,30 @@
 package com.like.zxing;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.view.SurfaceView;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.Toast;
+import android.widget.Button;
 
-import com.google.zxing.Result;
+import org.loqs.zxing.activity.QRCodeFragment;
 
-import org.zxing.activity.CaptureActivity;
-import org.zxing.view.AbViewfinderView;
-import org.zxing.view.ViewfinderView;
+public class CaptureActivity1 extends AppCompatActivity {
+    Button mLight;
 
-public class CaptureActivity1 extends CaptureActivity {
-
-
-    /**
-     * Called when the activity is first created.
-     */
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.camera);
+        mLight = (Button) findViewById(R.id.open);
+        getFragmentManager().beginTransaction().add(R.id.content, new QRCodeFragment(), "QRCodeFragment").commit();
     }
 
     public void ssButtonss(View view) {
-        photo();
+        QRCodeFragment fragment = (QRCodeFragment) getFragmentManager().findFragmentByTag("QRCodeFragment");
+        fragment.photo();
     }
 
     public void ssopen(View view) {
-        lightOnAndOff();
-    }
-
-    @Override
-    public AbViewfinderView getViewfinderView() {
-        return (ViewfinderView) findViewById(R.id.viewfinder_view);
-    }
-
-    @Override
-    public SurfaceView getSurfaceView() {
-        SurfaceView surfaceView = (SurfaceView) findViewById(R.id.preview_view);
-        return surfaceView;
-    }
-
-
-    @Override
-    public void handleDecode(Result result, String barcode) {
-        super.handleDecode(result, barcode);
-        String resultString = result.getText();
-        //FIXME
-        if (resultString.equals("")) {
-            Toast.makeText(getApplicationContext(), "Scan failed!", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(getApplicationContext(), resultString + "Scan!" + (barcode != null), Toast.LENGTH_SHORT).show();
-//			System.out.println("Result:"+resultString);
-            Intent resultIntent = new Intent();
-            Bundle bundle = new Bundle();
-            bundle.putString("path", barcode);
-            bundle.putString("result", resultString);
-            resultIntent.putExtras(bundle);
-            this.setResult(RESULT_OK, resultIntent);
-        }
-        finish();
+        QRCodeFragment fragment = (QRCodeFragment) getFragmentManager().findFragmentByTag("QRCodeFragment");
+        mLight.setText(fragment.lightOnAndOff() ? "关闭灯光" : "打开灯光");
     }
 }

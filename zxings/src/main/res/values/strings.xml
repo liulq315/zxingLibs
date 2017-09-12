@@ -1,7 +1,4 @@
 <resources>
-    <string name="app_name">zxingLibs</string>
-
-    <color name="possible_result_points">#c0ffff00</color>
-    <color name="viewfinder_laser">#ff0000</color>
-    <color name="viewfinder_mask">#60000000</color>
+    <string name="app_name">zxing</string>
+    <string name="scan_qrcode_tips">请将二维码放入框内，即可自动扫描</string>
 </resources>

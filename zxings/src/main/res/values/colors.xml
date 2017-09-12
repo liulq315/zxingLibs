@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#FF5252</color>
+    <color name="white">#ffffff</color>
+
+    <!--corner_color 边角颜色，
+scanner_color 扫描线颜色
+possible_result_color 扫描点颜色
+frame_color 扫描框边线颜色
+mask_color 模糊区域颜色
+label_text  框上方提示
+-->
+    <color name="mask_color">#b0000000</color>
+    <color name="result_color">#b0000000</color>
+    <color name="result_point_color">#c0ffbd21</color>
+    <color name="laser_color">#a0f0af</color>
+    <color name="frame_color">#0000</color>
+    <color name="corner_color">#0fff0f</color>
+
+</resources>

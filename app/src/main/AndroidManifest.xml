@@ -37,14 +37,6 @@
         <activity
             android:name=".CaptureActivity1"
             android:screenOrientation="portrait" />
-        <activity
-            android:name=".Main2Activity"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppThemeChen" />
-        <activity
-            android:name=".ScrollingActivity"
-            android:label="@string/title_activity_scrolling"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>
