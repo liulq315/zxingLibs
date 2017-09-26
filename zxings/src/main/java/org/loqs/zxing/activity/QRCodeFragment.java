@@ -10,6 +10,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -81,6 +82,7 @@ public class QRCodeFragment extends Fragment implements SurfaceHolder.Callback {
         return mLightOn;
     }
 
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -139,6 +141,7 @@ public class QRCodeFragment extends Fragment implements SurfaceHolder.Callback {
         }
     }
 
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -148,7 +151,6 @@ public class QRCodeFragment extends Fragment implements SurfaceHolder.Callback {
             } else {
                 Toast.makeText(getActivity().getApplicationContext(), "获取文件读写权限失败", Toast.LENGTH_SHORT).show();
             }
-            return;
         }
     }
 
@@ -178,19 +180,36 @@ public class QRCodeFragment extends Fragment implements SurfaceHolder.Callback {
     @Override
     public void onResume() {
         super.onResume();
+        initResume();
+    }
+
+    private void initPause() {
+        if (handler != null) {
+            handler.quitSynchronously();
+            handler = null;
+        }
+        inactivityTimer.onPause();
+        ambientLightManager.stop();
+        beepManager.close();
+        if (cameraManager != null)
+            cameraManager.closeDriver();
+        if (!hasSurface) {
+            SurfaceHolder surfaceHolder = surfaceView.getHolder();
+            surfaceHolder.removeCallback(this);
+        }
+        if (mLightOn) {
+            lightOnAndOff();
+        }
+    }
+
+    private void initResume() {
         if (cameraManager == null)
             cameraManager = new CameraManager(getActivity().getApplication());
-
-
         viewfinderView.setCameraManager(cameraManager);
-
         handler = null;
         beepManager.updatePrefs();
         ambientLightManager.start(cameraManager);
-
         inactivityTimer.onResume();
-
-
         characterSet = null;
         SurfaceHolder surfaceHolder = surfaceView.getHolder();
         if (hasSurface) {
@@ -202,7 +221,6 @@ public class QRCodeFragment extends Fragment implements SurfaceHolder.Callback {
 
     public void handleDecode(Result rawResult, String path, float scaleFactor) {
         inactivityTimer.onActivity();
-
         boolean fromLiveScan = !TextUtils.isEmpty(path);
         if (fromLiveScan) {
             beepManager.playBeepSoundAndVibrate();
@@ -309,22 +327,6 @@ public class QRCodeFragment extends Fragment implements SurfaceHolder.Callback {
     @Override
     public void onPause() {
         super.onPause();
-        if (handler != null) {
-            handler.quitSynchronously();
-            handler = null;
-        }
-        inactivityTimer.onPause();
-        ambientLightManager.stop();
-        beepManager.close();
-        cameraManager.closeDriver();
-        if (!hasSurface) {
-            SurfaceHolder surfaceHolder = surfaceView.getHolder();
-            surfaceHolder.removeCallback(this);
-        }
-        if (mLightOn) {
-            lightOnAndOff();
-        }
-        super.onPause();
-
+        initPause();
     }
 }

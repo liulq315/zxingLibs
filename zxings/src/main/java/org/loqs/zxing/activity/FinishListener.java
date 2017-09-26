@@ -19,6 +19,8 @@ package org.loqs.zxing.activity;
 import android.app.Activity;
 import android.content.DialogInterface;
 
+import org.loqs.zxing.JumpPermissionManagement;
+
 /**
  * Simple listener used to exit the app in a few cases.
  *
@@ -44,6 +46,7 @@ public final class FinishListener implements DialogInterface.OnClickListener, Di
 
   private void run() {
     activityToFinish.finish();
+    JumpPermissionManagement.GoToSetting(activityToFinish);
   }
 
 }

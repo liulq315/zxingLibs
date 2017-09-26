@@ -13,7 +13,6 @@ import android.widget.TextView;
 import org.loqs.zxing.encoding.EncodingHandler;
 
 
-
 public class MainActivity extends AppCompatActivity {
 
     private TextView resultTextView;
@@ -28,9 +27,7 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                startActivityForResult(new Intent(MainActivity.this, CaptureActivity.class), 0);
                 startActivityForResult(new Intent(MainActivity.this, CaptureActivity1.class), 0);
-//                startActivityForResult(new Intent(MainActivity.this, Main2Activity.class), 0);
             }
         });
         findViewById(R.id.EncodingHandler).setOnClickListener(new View.OnClickListener() {
