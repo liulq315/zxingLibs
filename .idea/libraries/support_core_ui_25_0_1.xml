@@ -1,9 +1,9 @@
 <component name="libraryTable">
   <library name="support-core-ui-25.0.1">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/support-core-ui-25.0.1.aar/35e0fe5a70c99e52fa91f33c098fae60/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/support-core-ui-25.0.1.aar/35e0fe5a70c99e52fa91f33c098fae60/res" />
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/support-core-ui-25.0.1.aar/35e0fe5a70c99e52fa91f33c098fae60/jars/libs/internal_impl-25.0.1.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/support-core-ui-25.0.1.aar/efe4ac75b990eb72e6e8d18f9ac111c4/jars/classes.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/support-core-ui-25.0.1.aar/efe4ac75b990eb72e6e8d18f9ac111c4/jars/libs/internal_impl-25.0.1.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/support-core-ui-25.0.1.aar/efe4ac75b990eb72e6e8d18f9ac111c4/res" />
     </CLASSES>
     <JAVADOC>
       <root url="jar://D:/pragram/Android/AndroidSDK/sdk/extras/android/m2repository/com/android/support/support-core-ui/25.0.1/support-core-ui-25.0.1-javadoc.jar!/" />
