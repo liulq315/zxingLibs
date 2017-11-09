@@ -17,6 +17,7 @@
 package org.loqs.zxing.camera;
 
 import android.content.Context;
+import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.Camera;
@@ -25,6 +26,7 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 
 import com.google.zxing.PlanarYUVLuminanceSource;
+
 import org.loqs.zxing.camera.open.OpenCamera;
 import org.loqs.zxing.camera.open.OpenCameraInterface;
 
@@ -41,13 +43,7 @@ public final class CameraManager {
 
     private static final String TAG = CameraManager.class.getSimpleName();
     private static final boolean DEBUG = false;
-
-    private static final int MIN_FRAME_WIDTH = 240;
-    private static final int MAX_FRAME_WIDTH = 675;
-
-    private static final int MIN_FRAME_HEIGHT = 240;
-    private static final int MAX_FRAME_HEIGHT = 675; // = 5/8 * 1080
-
+    
     private final Context context;
     private final CameraConfigurationManager configManager;
     private OpenCamera camera;
@@ -75,7 +71,6 @@ public final class CameraManager {
      * Opens the camera driver and initializes the hardware parameters.
      *
      * @param holder The surface object which the camera will draw preview frames into.
-     *
      * @throws IOException Indicates the camera driver failed to open.
      */
     public synchronized void openDriver(SurfaceHolder holder) throws IOException {
@@ -230,21 +225,28 @@ public final class CameraManager {
                 // Called early, before init even finished
                 return null;
             }
-            Log.i(TAG, "getFramingRect: " + screenResolution);
-//            width
-            int width = findDesiredDimensionInRange(screenResolution.x, MIN_FRAME_WIDTH,
-                    MAX_FRAME_WIDTH);
-//            height
-            int height = findDesiredDimensionInRange(screenResolution.y, MIN_FRAME_HEIGHT,
-                    MAX_FRAME_HEIGHT);
-            int min = width > height ? height : width ;
-            Log.i(TAG, "findDesiredDimensionInRange: width" + width + " height "+height);
-            int leftOffset = (screenResolution.x - min) / 2;
-            int topOffset = (screenResolution.y - min) / 3;
-            framingRect = new Rect(leftOffset, topOffset, leftOffset + min, topOffset + min);
-            Log.i(TAG, "getFramingRect: "+framingRect);
-            if (DEBUG)
-                Log.d(TAG, "Calculated framing rect: " + framingRect + ", w: " + framingRect.width() + ", h: " + framingRect.height());
+//            Log.i(TAG, "getFramingRect: " + screenResolution);
+////            width
+//            int width = findDesiredDimensionInRange(screenResolution.x, MIN_FRAME_WIDTH,
+//                    MAX_FRAME_WIDTH);
+////            height
+//            int height = findDesiredDimensionInRange(screenResolution.y, MIN_FRAME_HEIGHT,
+//                    MAX_FRAME_HEIGHT);
+//            int min = width > height ? height : width;
+//            Log.i(TAG, "findDesiredDimensionInRange: width" + width + " height " + height);
+//            int leftOffset = (screenResolution.x - min) / 2;
+//            int topOffset = (screenResolution.y - min) / 3;
+//            framingRect = new Rect(leftOffset, topOffset, leftOffset + min, topOffset + min);
+//            Log.i(TAG, "getFramingRect: " + framingRect);
+//            if (DEBUG)
+//                Log.d(TAG, "Calculated framing rect: " + framingRect + ", w: " + framingRect.width() + ", h: " + framingRect.height());
+
+
+            int width = screenResolution.x * 3 / 5;
+            int height = screenResolution.y * 3 / 7;
+            int leftOffset = (screenResolution.x - width) / 2;
+            int topOffset = (screenResolution.y - height) / 4;
+            framingRect = new Rect(leftOffset, topOffset, leftOffset + width, topOffset + width);
         }
         return framingRect;
     }
@@ -283,7 +285,7 @@ public final class CameraManager {
 //      rect.right = rect.right * cameraResolution.x / screenResolution.x;
 //      rect.top = rect.top * cameraResolution.y / screenResolution.y;
 //      rect.bottom = rect.bottom * cameraResolution.y / screenResolution.y;
-            if(screenResolution.x < screenResolution.y){
+            if (screenResolution.x < screenResolution.y) {
                 // portrait
                 rect.left = rect.left * cameraResolution.y / screenResolution.x;
                 rect.right = rect.right * cameraResolution.y / screenResolution.x;
@@ -346,7 +348,6 @@ public final class CameraManager {
      * @param data   A preview frame.
      * @param width  The width of the image.
      * @param height The height of the image.
-     *
      * @return A PlanarYUVLuminanceSource instance.
      */
     public PlanarYUVLuminanceSource buildLuminanceSource(byte[] data, int width, int height) {
@@ -356,7 +357,7 @@ public final class CameraManager {
         }
         // Go ahead and assume it's YUV rather than die.
         return new PlanarYUVLuminanceSource(data, width, height, rect.left, rect.top,
-                rect.width(), rect.height(), false);
+                rect.width(), rect.height(), !false);
     }
 
     public int getCameraOrientation() {

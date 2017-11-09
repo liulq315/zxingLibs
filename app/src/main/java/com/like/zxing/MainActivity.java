@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 EditText text = (EditText) findViewById(R.id.editText);
                 try {
-                    show.setImageBitmap(EncodingHandler.createQRCode(text.getText().toString(), dip2px(150), dip2px(150), BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher)));
+                    show.setImageBitmap(EncodingHandler.createQRCode(text.getText().toString(), dip2px(30), dip2px(30), BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher)));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

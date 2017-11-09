@@ -93,6 +93,7 @@ public class QRCodeFragment extends Fragment implements SurfaceHolder.Callback {
         new AsyncTasks(this).execute(photo_path);
     }
 
+
     static class AsyncTasks extends AsyncTask<String, Void, Result> {
         QRCodeFragment activity;
         String path;
@@ -226,20 +227,24 @@ public class QRCodeFragment extends Fragment implements SurfaceHolder.Callback {
             beepManager.playBeepSoundAndVibrate();
         }
 
-        String resultString = rawResult.getText();
-        //FIXME
-        if (TextUtils.isEmpty(resultString)) {
-            Toast.makeText(getActivity().getApplication(), "扫描二维码失败了", Toast.LENGTH_SHORT).show();
+        if (linster != null) {
+            linster.handleDecode(rawResult, path, scaleFactor);
         } else {
-            Intent resultIntent = new Intent();
-            Bundle bundle = new Bundle();
-            bundle.putString(KEY_RESULT, resultString);
-            // 不能使用Intent传递大于40kb的bitmap，可以使用一个单例对象存储这个bitmap
-//            bundle.putParcelable("bitmap", barcode);
-            resultIntent.putExtras(bundle);
-            getActivity().setResult(Activity.RESULT_OK, resultIntent);
+            String resultString = rawResult.getText();
+            //FIXME
+            if (TextUtils.isEmpty(resultString)) {
+                Toast.makeText(getActivity().getApplication(), "扫描二维码失败了", Toast.LENGTH_SHORT).show();
+            } else {
+                Intent resultIntent = new Intent();
+                Bundle bundle = new Bundle();
+                bundle.putString(KEY_RESULT, resultString);
+
+                resultIntent.putExtras(bundle);
+                getActivity().setResult(Activity.RESULT_OK, resultIntent);
+            }
+            getActivity().finish();
         }
-        getActivity().finish();
+
 
     }
 
@@ -329,4 +334,15 @@ public class QRCodeFragment extends Fragment implements SurfaceHolder.Callback {
         super.onPause();
         initPause();
     }
+
+    QRResultLinster linster;
+
+    public void setQRRLinster(QRResultLinster linster) {
+        this.linster = linster;
+    }
+
+    public static interface QRResultLinster {
+        void handleDecode(Result rawResult, String path, float scaleFactor);
+    }
+
 }

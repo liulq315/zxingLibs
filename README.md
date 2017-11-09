@@ -6,19 +6,7 @@ android 实现 二维码快速扫描功能
 会在近期内实现二维码扫描功能的(以实现)
 
 引用方式：
-
-1、compile 'com.github.zy-mylike:zxingLibs:v1.1.2a'
-
-allprojects {
-    repositories {
-        ...
-        maven { url 'https://jitpack.io' }
-    }
-}
-
-2、compile 'org.lqos.zxing:zxings:1.1.2a'
-
-
+compile 'org.lqos.zxing:zxings:1.1.6'
 
 继承CaptureActivity 实现几个方法 getSurfaceView()、getViewfinderView()后，
 
