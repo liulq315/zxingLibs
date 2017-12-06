@@ -24,5 +24,7 @@
     <item type="id" name="encode_succeeded"/>
     <item type="id" name="quit"/>
     <item type="id" name="restart_preview"/>
+    <item type="id" name="restart_pause"/>
+    <item type="id" name="restart_restart"/>
     <item type="id" name="return_scan_result"/>
 </resources>

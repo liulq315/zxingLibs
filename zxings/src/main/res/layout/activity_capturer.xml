@@ -22,7 +22,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <org.loqs.zxing.view.ViewfinderView
+    <org.lqos.zxing.view.ViewfinderView
         android:id="@+id/viewfinder_view"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" />

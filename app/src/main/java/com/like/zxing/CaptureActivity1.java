@@ -10,7 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
-import org.loqs.zxing.activity.QRCodeFragment;
+import org.lqos.zxing.activity.QRCodeFragment;
 
 public class CaptureActivity1 extends AppCompatActivity {
     Button mLight;
@@ -42,11 +42,12 @@ public class CaptureActivity1 extends AppCompatActivity {
 
     public void ssButtonss(View view) {
         QRCodeFragment fragment = (QRCodeFragment) getFragmentManager().findFragmentByTag("QRCodeFragment");
-        fragment.photo();
+        fragment.getHandler().sendEmptyMessage(R.id.restart_pause);
     }
 
     public void ssopen(View view) {
         QRCodeFragment fragment = (QRCodeFragment) getFragmentManager().findFragmentByTag("QRCodeFragment");
         mLight.setText(fragment.lightOnAndOff() ? "关闭灯光" : "打开灯光");
+        fragment.getHandler().sendEmptyMessage(R.id.restart_restart);
     }
 }

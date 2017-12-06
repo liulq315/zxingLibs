@@ -8,5 +8,6 @@
     <color name="viewfinder_mask">#60000000</color>
     <color name="possible_result_points">#459DF5</color>
     <color name="viewfinder_laser">#459DF5</color>
+    <color name="result_point_color">#459DF5</color>
 
 </resources>
