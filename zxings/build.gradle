@@ -5,12 +5,12 @@ apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion '26.0.2'
+    compileSdkVersion 29
+    buildToolsVersion '28.0.3'
 
     defaultConfig {
-        minSdkVersion 15
-        targetSdkVersion 25
+        minSdkVersion 14
+        targetSdkVersion 29
         versionCode 12
         versionName "1.1.6"
 
@@ -24,8 +24,9 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:25.0.1'
-    compile 'com.google.zxing:core:3.3.0'
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+    //    implementation 'com.google.zxing:core:3.3.2'
+    api files('lib/zxing_core_3.4.0.jar')
 }
 
 // 项目引用的版本号，比如compile 'com.yanzhenjie:andserver:1.0.1'中的1.0.1就是这里配置的。

@@ -2,11 +2,15 @@
 
 buildscript {
     repositories {
+        //阿里镜像
+        maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+        //谷歌仓库
         google()
         jcenter()
+        mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.0'
+        classpath 'com.android.tools.build:gradle:3.5.1'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:1.4.1'
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.4'
         // NOTE: Do not place your application dependencies here; they belong
@@ -16,8 +20,12 @@ buildscript {
 
 allprojects {
     repositories {
+        //阿里镜像
+        maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+        //谷歌仓库
         google()
         jcenter()
+        mavenCentral()
     }
     tasks.withType(Javadoc) {
         options{
