@@ -1,4 +1,8 @@
 # zxingLibs
+
+[![](https://jitpack.io/v/lqos/zxingLibs.svg)](https://jitpack.io/#lqos/zxingLibs)
+
+
 android 实现 二维码快速扫描功能
 
 二维码图片识别功能还未实现(以实现)
